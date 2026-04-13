@@ -1319,6 +1319,75 @@
       backdrop-filter: blur(15px);
       box-sizing: border-box;
     }
+
+    /* ESCAPE TAB CSS */
+    #escape-tab-content {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      overflow-y: auto;
+      padding: 16px;
+      box-sizing: border-box;
+      margin: 0;
+      width: 100%;
+      height: auto;
+      display: none;
+      flex-direction: column;
+      z-index: 50;
+    }
+    .esc-transport-grid {
+      display: flex;
+      width: 100%;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .esc-card {
+      flex: 1;
+      padding: 16px 8px;
+      border-radius: 12px;
+      border: 2px solid #ffffff15;
+      text-align: center;
+      cursor: pointer;
+      background: #12121a;
+      transition: all 0.3s ease;
+    }
+    .esc-card.active {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+    }
+    .esc-card div:first-child { font-size: 28px; margin-bottom: 8px; }
+    .esc-card div:last-child { font-size: 12px; font-weight: bold; color: white; }
+
+    .esc-recommendation {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+      box-sizing: border-box;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .esc-rec-title { color: #00ff88; font-weight: bold; font-size: 22px; margin-bottom: 15px; }
+    .esc-rec-details { list-style: none; padding: 0; margin: 0; color: #ddd; font-size: 14px; line-height: 1.8; }
+    
+    .esc-timeline { width: 100%; margin-top: 20px; position: relative; }
+    .esc-timeline-labels { display: flex; justify-content: space-between; color: white; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    .esc-bar-track { height: 4px; background: #ffffff20; border-radius: 2px; position: relative; width: 100%; }
+    .esc-bar-fill { height: 100%; background: #00ff88; border-radius: 2px; width: 60%; position: absolute; left: 0; top: 0; }
+    .esc-dot-now { width: 12px; height: 12px; background: #00ff88; border-radius: 50%; position: absolute; top: -4px; left: 60%; transform: translateX(-50%); }
+    .esc-dot-leave { width: 12px; height: 12px; background: #ff3355; border-radius: 50%; position: absolute; top: -4px; transform: translateX(-50%); transition: left 0.3s ease; }
+    .esc-dot-label { position: absolute; top: 12px; transform: translateX(-50%); font-size: 10px; white-space: nowrap; }
+    .esc-label-now { color: #00ff88; left: 60%; }
+    .esc-label-leave { color: #ff3355; transition: left 0.3s ease; }
+
+    body[data-theme="light"] .esc-card:not(.active) { background: rgba(255, 255, 255, 0.6) !important; border-color: #00000015 !important; }
+    body[data-theme="light"] .esc-card div:last-child { color: black !important; }
+    body[data-theme="light"] .esc-recommendation { background: rgba(255, 255, 255, 0.8) !important; border-color: #00000015 !important; }
+    body[data-theme="light"] .esc-rec-details { color: #333 !important; }
+    body[data-theme="light"] .esc-timeline-labels { color: black !important; }
   </style>
 </head>
 
@@ -1478,6 +1547,53 @@
         <div id="zs-d-best" style="font-size: 14px; margin: 8px 0; color: #ddd;">Best time to visit: When match is LOW</div>
         <div id="zs-d-walk" style="font-size: 14px; margin: 8px 0; color: #ddd;">Your walk time: 2-4 mins from your gate</div>
         <div id="zs-d-tip" style="color: gray; font-style: italic; font-size: 13px; margin-top: 12px;">Perfect time to go right now!</div>
+      </div>
+    </div>
+
+    <!-- Escape Tab Content -->
+    <div id="escape-tab-content">
+      <div style="margin-top: 10px;">
+        <div style="font-weight: bold; color: white; font-size: 20px;">🚗 Plan Your Exit</div>
+        <div style="color: gray; font-size: 13px; margin-top: 4px;">Beat the post-match rush</div>
+      </div>
+
+      <div class="esc-transport-grid">
+        <div class="esc-card active" onclick="selectTransport('Metro')" id="esc-card-Metro">
+          <div>🚇</div>
+          <div>Metro</div>
+        </div>
+        <div class="esc-card" onclick="selectTransport('Cab')" id="esc-card-Cab">
+          <div>🚕</div>
+          <div>Cab</div>
+        </div>
+        <div class="esc-card" onclick="selectTransport('Own Car')" id="esc-card-Own Car">
+          <div>🚗</div>
+          <div>Own Car</div>
+        </div>
+      </div>
+
+      <div class="esc-recommendation">
+        <div class="esc-rec-title" id="esc-rec-title">Leave at Over 19.2</div>
+        <ul class="esc-rec-details" id="esc-rec-details">
+          <li>✅ Metro platform will be empty</li>
+          <li>✅ Walk time to station: 8 mins</li>
+          <li>⚠️ If you leave at end: 35 min wait</li>
+          <li>Current crowd at exit: <span id="esc-live-exit" style="color: #00ff88; font-weight: bold;">CLEAR</span></li>
+        </ul>
+
+        <div class="esc-timeline">
+          <div class="esc-timeline-labels">
+            <span>NOW</span>
+            <span>MATCH END</span>
+          </div>
+          <div class="esc-bar-track">
+            <div class="esc-bar-fill"></div>
+            <div class="esc-dot-now"></div>
+            <div class="esc-label-now esc-dot-label">You are here</div>
+            <div class="esc-dot-leave" id="esc-dot-leave" style="left: 85%;"></div>
+            <div class="esc-label-leave esc-dot-label" id="esc-label-leave" style="left: 85%;">Best exit</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1870,6 +1986,9 @@
       if (typeof updateZonesTabMap === 'function') {
         updateZonesTabMap();
       }
+      if (typeof selectTransport === 'function' && document.getElementById('escape-tab-content') && document.getElementById('escape-tab-content').style.display === 'flex') {
+        selectTransport(currentSelectedTransport);
+      }
     }
 
     function randomizeAllStates() {
@@ -2146,18 +2265,76 @@
       const label = clickedBtn.querySelector('.fm-tab-label').innerText.trim();
       const db = document.getElementById('dashboard-screen');
       const zc = document.getElementById('zones-tab-content');
-      if (db && zc) {
+      const esc = document.getElementById('escape-tab-content');
+      if (db && zc && esc) {
         if (label === 'Home') {
           db.style.display = 'flex';
           zc.style.display = 'none';
+          esc.style.display = 'none';
         } else if (label === 'Zones') {
           db.style.display = 'none';
           zc.style.display = 'flex';
+          esc.style.display = 'none';
           updateZonesTabMap();
+        } else if (label === 'Escape') {
+          db.style.display = 'none';
+          zc.style.display = 'none';
+          esc.style.display = 'flex';
+          selectTransport(currentSelectedTransport);
         } else {
           db.style.display = 'none';
           zc.style.display = 'none';
+          esc.style.display = 'none';
         }
+      }
+    }
+
+    let currentSelectedTransport = 'Metro';
+
+    function selectTransport(vehicle) {
+      currentSelectedTransport = vehicle;
+      document.querySelectorAll('.esc-card').forEach(c => c.classList.remove('active'));
+      let el = document.getElementById('esc-card-' + vehicle);
+      if (el) el.classList.add('active');
+
+      const titleEl = document.getElementById('esc-rec-title');
+      const detailsEl = document.getElementById('esc-rec-details');
+      const dotL = document.getElementById('esc-dot-leave');
+      const labL = document.getElementById('esc-label-leave');
+      
+      const liveState = currentVenueZonesData['Exit Gate'] || 'CLEAR';
+
+      if (vehicle === 'Metro') {
+        titleEl.innerText = 'Leave at Over 19.2';
+        titleEl.style.color = '#00ff88';
+        detailsEl.innerHTML = `
+          <li>✅ Metro platform will be empty</li>
+          <li>✅ Walk time to station: 8 mins</li>
+          <li>⚠️ If you leave at end: 35 min wait</li>
+          <li>Current crowd at exit: <span style="color: ${liveState==='BUSY'?'#ff3355':liveState==='MODERATE'?'#ffcc00':'#00ff88'}; font-weight: bold;">${liveState}</span></li>
+        `;
+        if(dotL) dotL.style.left = '85%';
+        if(labL) labL.style.left = '85%';
+      } else if (vehicle === 'Cab') {
+        titleEl.innerText = 'Leave at Over 19.4';
+        titleEl.style.color = '#00ff88';
+        detailsEl.innerHTML = `
+          <li>✅ Cabs available outside Gate A</li>
+          <li>✅ Current cab wait: 3 mins</li>
+          <li>⚠️ If you leave at end: 22 min wait</li>
+        `;
+        if(dotL) dotL.style.left = '90%';
+        if(labL) labL.style.left = '90%';
+      } else if (vehicle === 'Own Car') {
+        titleEl.innerText = 'Stay Till End';
+        titleEl.style.color = '#00ff88';
+        detailsEl.innerHTML = `
+          <li>✅ Parking Zone C clears in 20 mins</li>
+          <li>✅ Avoid exit before 10 mins post match</li>
+          <li>⚠️ Current parking crowd: MODERATE</li>
+        `;
+        if(dotL) dotL.style.left = '100%';
+        if(labL) labL.style.left = '100%';
       }
     }
 
