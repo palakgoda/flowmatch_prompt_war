@@ -20,7 +20,8 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="no-referrer">
   <meta charset="UTF-8">
@@ -31,28 +32,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FLOWMATCH01"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-FLOWMATCH01');
-    
+
     function trackVenueEntry(seatSection) {
       gtag('event', 'venue_entry', {
         'seat_section': seatSection,
         'timestamp': new Date().toISOString()
       });
     }
-    
+
     function trackRecommendation(status, sport) {
       gtag('event', 'recommendation_shown', {
         'status': status,
         'sport': sport
       });
     }
-    
+
     function trackVenueExit(seatSection) {
       gtag('event', 'venue_exit', {
         'seat_section': seatSection
@@ -203,8 +204,13 @@
     /* ------- LOGIN SCREEN ------- */
     #login-screen {
       justify-content: center;
-      height: auto;
-      min-height: 100vh;
+      height: 100vh;
+      align-items: center;
+      overflow: hidden;
+      display: none;
+    }
+    #login-screen.active {
+      display: flex;
     }
 
     .login-card {
@@ -212,7 +218,9 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
-      padding: 50px;
+      padding: 30px;
+      max-height: 90vh;
+      overflow: hidden;
       border-radius: 24px;
       width: 100%;
       box-sizing: border-box;
@@ -433,12 +441,14 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-bottom: 25px;
+      margin-bottom: 0;
       background: rgba(0, 0, 0, 0.8);
-      padding: 10px 15px;
+      padding: 6px 16px;
       border-radius: 12px;
       box-sizing: border-box;
       border: 1px solid rgba(255, 255, 255, 0.05);
+      max-height: 40px;
+      flex-shrink: 0;
     }
 
     .user-info {
@@ -460,7 +470,7 @@
     }
 
     #welcomeText {
-      font-size: 0.95rem;
+      font-size: 12px;
       font-weight: 600;
       color: white;
     }
@@ -473,13 +483,14 @@
       background: transparent;
       border: 1px solid var(--deep-red);
       color: var(--deep-red);
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 20px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 10px;
+      white-space: nowrap;
     }
 
     .btn-leave:hover {
@@ -493,7 +504,7 @@
       display: flex;
       justify-content: space-between;
       background: #111;
-      padding: 4px;
+      padding: 2px;
       border-radius: 12px;
       width: 100%;
       box-sizing: border-box;
@@ -501,23 +512,28 @@
       overflow: hidden;
       border: 1px solid #222;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
-      margin-bottom: 25px;
+      margin-bottom: 0;
+      height: 32px;
+      flex-shrink: 0;
     }
 
     .tab {
       background: transparent;
       border: none;
       color: #666;
-      padding: 12px 0;
+      padding: 6px 12px;
       cursor: pointer;
       font-weight: 800;
       transition: all 0.3s ease;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 11px;
       flex: 1;
       text-transform: uppercase;
       letter-spacing: 1px;
       border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .tab:hover {
@@ -554,65 +570,69 @@
     }
 
     /* Panels */
+    .dashboard-row-1 {
+      display: flex;
+      width: 100%;
+      gap: 16px;
+      height: 180px;
+      flex-shrink: 0;
+    }
+
     .panel {
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
-      padding: 25px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 0;
       backdrop-filter: blur(15px);
-      width: 100%;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .intensity-panel, .zones-panel {
+      width: 50%;
+      height: 100%;
     }
 
     .panel h2 {
-      font-size: 1rem;
+      font-size: 12px;
       margin-top: 0;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: rgba(255, 255, 255, 0.6);
       text-align: left;
+      line-height: 1;
     }
 
     /* Intensity Panel */
     .intensity-card {
-      border-radius: 12px;
+      border-radius: 8px;
       transition: all 0.5s ease;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px;
+      padding: 0;
       position: relative;
       overflow: hidden;
-    }
-
-    .intensity-card.HIGH {
-      background: linear-gradient(90deg, rgba(255, 51, 85, 0.2), transparent);
-      border-left: 4px solid var(--deep-red);
-    }
-
-    .intensity-card.MEDIUM {
-      background: linear-gradient(90deg, rgba(255, 204, 0, 0.2), transparent);
-      border-left: 4px solid var(--yellow);
-    }
-
-    .intensity-card.LOW {
-      background: linear-gradient(90deg, rgba(0, 255, 136, 0.2), transparent);
-      border-left: 4px solid var(--neon-green);
+      flex: 1;
+      background: transparent !important;
+      border: none !important;
     }
 
     .intensity-content {
       display: flex;
       flex-direction: column;
       flex: 1;
+      justify-content: center;
     }
 
     .intensity-title {
-      font-size: 4rem;
+      font-size: 3rem;
       font-weight: 800;
       line-height: 1;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       letter-spacing: -2px;
     }
 
@@ -632,8 +652,9 @@
     }
 
     .intensity-reason {
-      font-size: 1rem;
+      font-size: 13px;
       color: rgba(255, 255, 255, 0.8);
+      line-height: 1.2;
     }
 
     /* EQ Anim */
@@ -641,48 +662,37 @@
       display: flex;
       align-items: flex-end;
       gap: 6px;
-      height: 60px;
-      padding-left: 20px;
+      height: 44px;
+      padding-left: 12px;
     }
 
     .eq-bar {
-      width: 12px;
+      width: 8px;
       background: white;
-      border-radius: 6px 6px 0 0;
+      border-radius: 4px 4px 0 0;
       animation: eqBounce ease-in-out infinite alternate;
     }
 
-    .eq-bar:nth-child(1) {
-      height: 100%;
-      animation-delay: 0s;
-    }
-
-    .eq-bar:nth-child(2) {
-      height: 60%;
-      animation-delay: 0.15s;
-    }
-
-    .eq-bar:nth-child(3) {
-      height: 80%;
-      animation-delay: 0.3s;
-    }
+    .eq-bar:nth-child(1) { height: 100%; animation-delay: 0s; }
+    .eq-bar:nth-child(2) { height: 60%; animation-delay: 0.15s; }
+    .eq-bar:nth-child(3) { height: 80%; animation-delay: 0.3s; }
 
     .intensity-card.HIGH .eq-bar {
       background: var(--deep-red);
       animation-duration: 0.3s;
-      box-shadow: 0 0 10px var(--deep-red);
+      box-shadow: 0 0 5px var(--deep-red);
     }
 
     .intensity-card.MEDIUM .eq-bar {
       background: var(--yellow);
       animation-duration: 0.6s;
-      box-shadow: 0 0 10px var(--yellow);
+      box-shadow: 0 0 5px var(--yellow);
     }
 
     .intensity-card.LOW .eq-bar {
       background: var(--neon-green);
       animation-duration: 1.2s;
-      box-shadow: 0 0 10px var(--neon-green);
+      box-shadow: 0 0 5px var(--neon-green);
     }
 
     @keyframes eqBounce {
@@ -699,97 +709,66 @@
 
     /* Zones Grid */
     .zones-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
     }
 
     .zone-card {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 18px 12px;
-      border-radius: 16px;
+      padding: 0;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row-reverse;
       align-items: center;
-      transition: all 0.5s ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
+      justify-content: flex-end;
+      gap: 10px;
+      height: auto;
     }
 
     .zone-icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
+      display: none;
     }
 
     .zone-name {
-      font-size: 0.85rem;
+      font-size: 13px;
       color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 10px;
+      margin-bottom: 0;
       font-weight: 600;
+      white-space: nowrap;
+      line-height: 2;
     }
 
     .zone-status-container {
-      width: 100%;
+      width: auto;
       display: flex;
-      flex-direction: column;
       align-items: center;
     }
 
     .zone-status-text {
       font-weight: 800;
-      font-size: 0.75rem;
-      margin-bottom: 6px;
+      font-size: 0;
+      margin-bottom: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
     }
 
-    .zone-status-text.CLEAR {
-      color: var(--neon-green);
-    }
-
-    .zone-status-text.MODERATE {
-      color: var(--yellow);
-    }
-
-    .zone-status-text.BUSY {
-      color: var(--deep-red);
-    }
+    .zone-status-text.CLEAR { background: var(--neon-green); }
+    .zone-status-text.MODERATE { background: var(--yellow); }
+    .zone-status-text.BUSY { background: var(--deep-red); }
 
     .zone-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .zone-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.5s ease, background 0.5s ease;
-    }
-
-    .zone-bar-fill.CLEAR {
-      width: 10%;
-      background: var(--neon-green);
-      box-shadow: 0 0 5px var(--neon-green);
-    }
-
-    .zone-bar-fill.MODERATE {
-      width: 50%;
-      background: var(--yellow);
-      box-shadow: 0 0 5px var(--yellow);
-    }
-
-    .zone-bar-fill.BUSY {
-      width: 90%;
-      background: var(--deep-red);
-      box-shadow: 0 0 5px var(--deep-red);
+      display: none;
     }
 
     /* Recommendation Box */
     .recommendation-box {
-      padding: 30px;
+      padding: 24px;
       border-radius: 16px;
-      margin-bottom: 25px;
+      margin-bottom: 0;
       transition: all 0.5s ease;
       width: 100%;
       box-sizing: border-box;
@@ -801,6 +780,7 @@
       border-left: 8px solid transparent;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .recommendation-box::before {
@@ -858,57 +838,56 @@
     }
 
     .rec-title {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 800;
       margin-bottom: 8px;
       line-height: 1.1;
       letter-spacing: -1px;
     }
 
-    .recommendation-box.GREEN .rec-title {
-      color: var(--neon-green);
-    }
-
-    .recommendation-box.RED .rec-title {
-      color: var(--deep-red);
-    }
-
-    .recommendation-box.YELLOW .rec-title {
-      color: var(--yellow);
-    }
+    .recommendation-box.GREEN .rec-title { color: var(--neon-green); }
+    .recommendation-box.RED .rec-title { color: var(--deep-red); }
+    .recommendation-box.YELLOW .rec-title { color: var(--yellow); }
 
     .rec-reason {
-      font-size: 1.1rem;
+      font-size: 13px;
       font-weight: 400;
       opacity: 0.9;
-      line-height: 1.5;
+      line-height: 1.2;
     }
 
     /* Timer Section */
     .timer-section {
-      text-align: center;
-      margin-bottom: 30px;
+      text-align: left;
+      margin-bottom: 0;
       width: 100%;
+      height: auto;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .timer-text {
-      font-size: 1rem;
-      margin-bottom: 12px;
+      font-size: 13px;
+      margin-bottom: 6px;
       color: rgba(255, 255, 255, 0.9);
     }
 
     #timerValue {
       color: var(--neon-green);
       font-weight: 800;
-      font-size: 1.6rem;
+      font-size: 16px;
       margin-left: 5px;
     }
 
     .progress-bar-container {
       width: 100%;
-      height: 12px;
+      height: 8px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
     }
 
@@ -917,46 +896,46 @@
       background: var(--neon-green);
       width: 100%;
       transition: width 1s linear;
-      box-shadow: 0 0 15px var(--neon-green);
+      box-shadow: 0 0 10px var(--neon-green);
     }
 
     .action-section {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 0;
       width: 100%;
+      height: auto;
+      flex-shrink: 0;
     }
 
     .btn-back {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      padding: 16px 32px;
-      font-size: 1.1rem;
-      border-radius: 30px;
+      height: 50px;
+      width: 100%;
+      padding: 0;
+      font-size: 16px;
+      border-radius: 12px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
       font-family: inherit;
       backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-back:hover {
       background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
     }
 
     .back-message {
-      margin-top: 15px;
-      min-height: 24px;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: opacity 0.3s ease;
-      opacity: 0;
+      display: none !important;
     }
 
     .back-message.show {
-      opacity: 1;
+      display: none !important;
     }
 
     /* Exit Screen */
@@ -991,143 +970,418 @@
     footer p {
       margin: 5px 0;
     }
-  
-    a:focus, button:focus, input:focus, select:focus, textarea:focus, [tabindex]:focus {
+
+    a:focus,
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus,
+    [tabindex]:focus {
       outline: 2px solid #00ff88 !important;
       outline-offset: 3px !important;
     }
-</style>
+
+    /* --- ADDED FLOWMATCH BARS CSS --- */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    html,
+    body {
+      overflow: hidden !important;
+      height: 100vh !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    #main-content-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    #dashboard-screen {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      overflow: hidden;
+      padding: 12px 16px !important;
+      box-sizing: border-box;
+      gap: 16px;
+      margin: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    #exit-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0a0a0f !important;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    #exit-screen.active {
+      display: flex;
+    }
+
+    .fm-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      background: #12121a;
+      border-bottom: 1px solid #ffffff15;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      box-sizing: border-box;
+      z-index: 1000;
+    }
+
+    .fm-top-left,
+    .fm-top-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fm-logo-text {
+      font-weight: bold;
+      background: linear-gradient(90deg, #00ff88, #0088ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.2rem;
+    }
+
+    .fm-pulsing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff88;
+      animation: fm-pulse 1.5s infinite;
+    }
+
+    @keyframes fm-pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(0, 255, 136, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+      }
+    }
+
+    .fm-live-text {
+      font-size: 10px;
+      color: #00ff88;
+      letter-spacing: 2px;
+    }
+
+    .fm-theme-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fm-seat-badge {
+      background: #00ff88;
+      color: #000;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .fm-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      background: #12121a;
+      border-top: 1px solid #ffffff15;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .fm-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #8888aa;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      padding: 4px 10px;
+    }
+
+    .fm-tab.active {
+      color: #00ff88;
+    }
+
+    .fm-tab-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .fm-tab-label {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .fm-tab-dot {
+      position: absolute;
+      top: -2px;
+      width: 4px;
+      height: 4px;
+      background: #00ff88;
+      border-radius: 50%;
+      display: none;
+    }
+
+    .fm-tab.active .fm-tab-dot {
+      display: block;
+    }
+
+    /* LIGHT MODE CSS */
+    body[data-theme="light"] {
+      background: #e9e9f0 !important;
+    }
+
+    body[data-theme="light"] .fm-top-bar,
+    body[data-theme="light"] .fm-bottom-bar {
+      background: #ffffff;
+      border-color: #00000015;
+    }
+
+    body[data-theme="light"] .login-card h2,
+    body[data-theme="light"] .auth-tab.active,
+    body[data-theme="light"] .qr-text,
+    body[data-theme="light"] input[type="text"],
+    body[data-theme="light"] #welcomeText,
+    body[data-theme="light"] .tab.active,
+    body[data-theme="light"] .recommendation-box.GREEN,
+    body[data-theme="light"] .recommendation-box.RED,
+    body[data-theme="light"] .recommendation-box.YELLOW,
+    body[data-theme="light"] .btn-back,
+    body[data-theme="light"] #exitSeatText,
+    body[data-theme="light"] .zone-name,
+    body[data-theme="light"] .intensity-reason,
+    body[data-theme="light"] .timer-text,
+    body[data-theme="light"] .tagline,
+    body[data-theme="light"] .pill,
+    body[data-theme="light"] .login-footer-text,
+    body[data-theme="light"] .qr-subtext,
+    body[data-theme="light"] .rec-reason,
+    body[data-theme="light"] footer p,
+    body[data-theme="light"] .panel h2,
+    body[data-theme="light"] #exit-screen h1 {
+      color: #0a0a0f !important;
+    }
+
+    body[data-theme="light"] .tab:not(.active) {
+      color: #555 !important;
+    }
+
+    body[data-theme="light"] .login-card,
+    body[data-theme="light"] .auth-tabs,
+    body[data-theme="light"] .qr-mock-area,
+    body[data-theme="light"] input[type="text"],
+    body[data-theme="light"] .pill,
+    body[data-theme="light"] .top-nav,
+    body[data-theme="light"] .tabs-container,
+    body[data-theme="light"] .panel,
+    body[data-theme="light"] .zone-card,
+    body[data-theme="light"] .btn-back,
+    body[data-theme="light"] footer {
+      border-color: #00000015 !important;
+    }
+
+    body[data-theme="light"] .login-card,
+    body[data-theme="light"] .panel,
+    body[data-theme="light"] .top-nav,
+    body[data-theme="light"] .tabs-container {
+      background: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    body[data-theme="light"] input[type="text"] {
+      background: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    body[data-theme="light"] .zone-card {
+      background: rgba(255, 255, 255, 0.6) !important;
+    }
+  </style>
 </head>
 
 <body>
 
-  <div class="particles-container" id="particlesContainer"></div>
+  <div class="fm-top-bar">
+    <div class="fm-top-left">
+      <div class="fm-logo-text">FlowMatch</div>
+      <div class="fm-pulsing-dot"></div>
+      <div class="fm-live-text">LIVE</div>
+    </div>
+    <div class="fm-top-right">
+      <button class="fm-theme-btn" id="fmThemeToggle">🌙</button>
+      <div class="fm-seat-badge" id="fmSeatBadge"></div>
+    </div>
+  </div>
 
-  <!-- Login Screen -->
-  <div id="login-screen" class="container screen">
-    <h1 class="logo">FlowMatch</h1>
-    <p class="tagline">Never miss a moment. Never wait in a queue.</p>
+  <div id="main-content-wrapper">
+    <div class="particles-container" id="particlesContainer"></div>
 
-    <div class="login-card">
-      <div class="login-card-icon"><span role="img" aria-label="ticket" title="ticket">🎟️</span></div>
-      <h2>Scan or Enter Your Ticket</h2>
-      <div class="login-subtext">Your personal stadium AI activates instantly</div>
+    <!-- Login Screen -->
+    <div id="login-screen" class="container screen">
 
-      <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchTab('enter-tab')">Enter Ticket ID</div>
-        <div class="auth-tab" onclick="switchTab('scan-tab')">Scan QR</div>
-      </div>
+      <div class="login-card">
+        <div class="login-card-icon"><span role="img" aria-label="ticket" title="ticket">🎟️</span></div>
+        <h2>Scan or Enter Your Ticket</h2>
+        <div class="login-subtext">Your personal stadium AI activates instantly</div>
 
-      <div id="enter-tab" class="tab-content active">
-        <input type="text" id="ticketInput" maxlength="20" placeholder="e.g. IPL-2026-A12"  oninput="debouncedValidate()" />
-        <div id="ticketError" style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: -10px; margin-bottom: 15px; min-height: 20px;" role="alert" aria-live="assertive">></div>
-        <button onclick="enterVenue()" class="btn-main" aria-label="Enter venue with your ticket ID">Enter Venue &rarr;</button>
-      </div>
+        <div class="auth-tabs">
+          <div class="auth-tab active" onclick="switchTab('enter-tab')">Enter Ticket ID</div>
+          <div class="auth-tab" onclick="switchTab('scan-tab')">Scan QR</div>
+        </div>
 
-      <div id="scan-tab" class="tab-content">
-        <div class="qr-mock-area">
-          <div class="camera-icon"><span role="img" aria-label="camera" title="camera">📷</span></div>
-          <div class="qr-text">Point your camera at your ticket QR code</div>
-          <div class="qr-subtext">(In live venues, your ticket QR opens this automatically &mdash; no scanning needed)
+        <div id="enter-tab" class="tab-content active">
+          <input type="text" id="ticketInput" maxlength="20" placeholder="e.g. IPL-2026-A12"
+            oninput="debouncedValidate()" />
+          <div id="ticketError"
+            style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: -10px; margin-bottom: 15px; min-height: 20px;"
+            role="alert" aria-live="assertive">></div>
+          <button onclick="enterVenue()" class="btn-main" aria-label="Enter venue with your ticket ID">Enter Venue
+            &rarr;</button>
+        </div>
+
+        <div id="scan-tab" class="tab-content">
+          <div class="qr-mock-area">
+            <div class="camera-icon"><span role="img" aria-label="camera" title="camera">📷</span></div>
+            <div class="qr-text">Point your camera at your ticket QR code</div>
+            <div class="qr-subtext">(In live venues, your ticket QR opens this automatically &mdash; no scanning needed)
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="feature-pills">
+        <span class="pill"><span role="img" aria-label="lightning bolt" title="lightning bolt">⚡</span> Real-time</span>
+        <span class="pill"><span role="img" aria-label="bullseye" title="bullseye">🎯</span> Personalized</span>
+        <span class="pill"><span role="img" aria-label="lock" title="lock">🔒</span> Session Only</span>
+      </div>
+
+      <div class="login-footer-text">
+        Your session ends automatically when you leave the venue
+      </div>
     </div>
 
-    <div class="feature-pills">
-      <span class="pill"><span role="img" aria-label="lightning bolt" title="lightning bolt">⚡</span> Real-time</span>
-      <span class="pill"><span role="img" aria-label="bullseye" title="bullseye">🎯</span> Personalized</span>
-      <span class="pill"><span role="img" aria-label="lock" title="lock">🔒</span> Session Only</span>
-    </div>
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="container screen">
 
-    <div class="login-footer-text">
-      Your session ends automatically when you leave the venue
-    </div>
-  </div>
-
-  <!-- Dashboard Screen -->
-  <div id="dashboard-screen" class="container screen">
-
-    <div class="top-nav">
-      <div class="user-info">
-        <div class="status-dot"></div>
-        <div class="user-details">
-          <div id="welcomeText">Welcome, Seat A12 — Gate A</div>
+      <div class="top-nav">
+        <div class="user-info">
+          <div class="status-dot"></div>
+          <div class="user-details">
+            <div id="welcomeText">Welcome, Seat A12 — Gate A</div>
+          </div>
+        </div>
+        <button onclick="leaveVenue()" class="btn-leave" aria-label="Leave venue and end your session"><span
+            class="material-icons"
+            style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">exit_to_app</span> Leave
+          Venue</button>
+        <div class="small-info">
+          <!-- Hidden logically but available to satisfy original JS -->
+          <span id="gateText"></span><br />
+          <span id="zoneText"></span>
         </div>
       </div>
-      <button onclick="leaveVenue()" class="btn-leave" aria-label="Leave venue and end your session"><span class="material-icons" style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">exit_to_app</span> Leave Venue</button>
-      <div class="small-info">
-        <!-- Hidden logically but available to satisfy original JS -->
-        <span id="gateText"></span><br />
-        <span id="zoneText"></span>
+
+      <div class="tabs-container" id="tabsContainer">
+        <!-- Tabs rendered by JS -->
       </div>
+
+      <div class="dashboard-row-1">
+        <section class="panel intensity-panel">
+          <h2>MATCH INTENSITY</h2>
+          <div class="intensity-card" id="intensityCard">
+            <div class="intensity-content">
+              <div class="intensity-title" id="intensityTitle">...</div>
+              <div class="intensity-reason" id="intensityReason">...</div>
+            </div>
+            <div class="eq-bars">
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+              <div class="eq-bar"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel zones-panel">
+          <h2>ZONES</h2>
+          <div class="zones-grid" id="zonesGrid">
+            <!-- Zones rendered by JS -->
+          </div>
+        </section>
+      </div>
+
+      <section class="recommendation-box" id="recBox" role="status" aria-live="polite">
+        <div class="rec-title" id="recTitle">...</div>
+        <div class="rec-reason" id="recReason">...</div>
+      </section>
+
+      <section class="timer-section" id="timerSection" style="display:none;">
+        <div class="timer-text">Your safe window closes in <span id="timerValue">4:00</span></div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </section>
+
+      <section class="action-section" id="actionSection" style="display:none;">
+        <button class="btn-back" onclick="imBack()" aria-label="Confirm you are back at your seat"><span
+            class="material-icons"
+            style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">event_seat</span> I'm Back at My
+          Seat <span role="img" aria-label="check mark" title="check mark">✅</span></button>
+        <div id="backMessage" class="back-message"></div>
+      </section>
+
     </div>
 
-    <div class="tabs-container" id="tabsContainer">
-      <!-- Tabs rendered by JS -->
+    <!-- Exit Screen -->
+    <div id="exit-screen" class="screen">
+      <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+      <h1 style="font-size: 2rem; font-weight: bold; color: #00ff88; margin: 0 0 10px 0;">Thanks for using FlowMatch!</h1>
+      <p id="exitSeatText" style="color: white; font-size: 1.2rem; margin: 5px 0;">Session ended for Seat A12</p>
+      <p style="color: gray; margin-top: 20px;">See you at the next match! <span role="img" aria-label="cricket bat and ball" title="cricket bat and ball">🏏</span></p>
     </div>
-
-    <section class="panel">
-      <h2>Match Intensity Right Now</h2>
-      <div class="intensity-card" id="intensityCard">
-        <div class="intensity-content">
-          <div class="intensity-title" id="intensityTitle">...</div>
-          <div class="intensity-reason" id="intensityReason">...</div>
-        </div>
-        <div class="eq-bars">
-          <div class="eq-bar"></div>
-          <div class="eq-bar"></div>
-          <div class="eq-bar"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Venue Zones Right Now</h2>
-      <iframe
-        title="Venue Location"
-        width="100%"
-        height="120"
-        style="border:0; border-radius:12px; margin-bottom:15px; opacity:0.7;"
-        loading="lazy"
-        allowfullscreen
-        referrerpolicy="no-referrer-when-downgrade"
-        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-placeholder&q=Wankhede+Stadium,Mumbai">
-      </iframe>
-      <div class="zones-grid" id="zonesGrid">
-        <!-- Zones rendered by JS -->
-      </div>
-    </section>
-
-    <section class="recommendation-box" id="recBox" role="status" aria-live="polite">
-      <div class="rec-title" id="recTitle">...</div>
-      <div class="rec-reason" id="recReason">...</div>
-    </section>
-
-    <section class="timer-section" id="timerSection" style="display:none;">
-      <div class="timer-text">Your safe window closes in <span id="timerValue">4:00</span></div>
-      <div class="progress-bar-container">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
-    </section>
-
-    <section class="action-section" id="actionSection" style="display:none;">
-      <button class="btn-back" onclick="imBack()" aria-label="Confirm you are back at your seat"><span class="material-icons" style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">event_seat</span> I'm Back at My Seat <span role="img" aria-label="check mark" title="check mark">✅</span></button>
-      <div id="backMessage" class="back-message"></div>
-    </section>
-
-    <footer>
-      <p>FlowMatch uses live match patterns and venue data to find your perfect break window.</p>
-      <p>Built with Google Antigravity</p>
-    </footer>
-
-  </div>
-
-  <!-- Exit Screen -->
-  <div id="exit-screen" class="container screen">
-    <h1>Thanks for using FlowMatch!</h1>
-    <p id="exitSeatText">Session ended for Seat A12</p>
-    <p>See you at the next match! <span role="img" aria-label="cricket bat and ball" title="cricket bat and ball">🏏</span></p>
   </div>
 
   <script>
@@ -1189,11 +1443,11 @@
         particleElement.style.width = particleSize + 'px';
         particleElement.style.height = particleSize + 'px';
         particleElement.style.left = Math.random() * 100 + 'vw';
-        
+
         particlesList.push({
-           el: particleElement,
-           y: Math.random() * 100,
-           speed: (Math.random() * 0.1) + 0.05
+          el: particleElement,
+          y: Math.random() * 100,
+          speed: (Math.random() * 0.1) + 0.05
         });
         particlesContainerElement.appendChild(particleElement);
       }
@@ -1204,12 +1458,12 @@
       particlesList.forEach(p => {
         p.y -= p.speed;
         if (p.y < 0) p.y = 100;
-        
+
         let opacity = 0;
         if (p.y > 80) opacity = (100 - p.y) / 20 * 0.6;
         else if (p.y > 20) opacity = 0.6;
         else opacity = (p.y / 20) * 0.6;
-        
+
         if (p.el) {
           p.el.style.transform = `translateY(${p.y}vh) scale(1)`;
           p.el.style.opacity = opacity;
@@ -1224,12 +1478,12 @@
 
       if (tabIdName === 'enter-tab') {
         const authTabs = document.querySelectorAll('.auth-tab');
-        if(authTabs.length > 0) authTabs[0].classList.add('active');
+        if (authTabs.length > 0) authTabs[0].classList.add('active');
         const enterTab = document.getElementById('enter-tab');
         if (enterTab) enterTab.classList.add('active');
       } else {
         const authTabs = document.querySelectorAll('.auth-tab');
-        if(authTabs.length > 1) authTabs[1].classList.add('active');
+        if (authTabs.length > 1) authTabs[1].classList.add('active');
         const scanTab = document.getElementById('scan-tab');
         if (scanTab) scanTab.classList.add('active');
       }
@@ -1239,6 +1493,20 @@
       document.querySelectorAll('.screen').forEach(screenElement => screenElement.classList.remove('active'));
       const targetScreen = document.getElementById(screenId);
       if (targetScreen) targetScreen.classList.add('active');
+
+      const topBar = document.querySelector('.fm-top-bar');
+      const bottomBar = document.querySelector('.fm-bottom-bar');
+      const wrapper = document.getElementById('main-content-wrapper');
+
+      if (topBar && bottomBar) {
+        if (screenId === 'dashboard-screen') {
+          topBar.style.display = 'flex';
+          bottomBar.style.display = 'flex';
+        } else {
+          topBar.style.display = 'none';
+          bottomBar.style.display = 'none';
+        }
+      }
     }
 
     function renderSportTabs() {
@@ -1254,10 +1522,10 @@
       try {
         const intensityCardElement = document.getElementById('intensityCard');
         if (intensityCardElement) intensityCardElement.className = `intensity-card ${currentMatchIntensity}`;
-        
+
         const intensityTitle = document.getElementById('intensityTitle');
         if (intensityTitle) intensityTitle.innerText = currentMatchIntensity;
-        
+
         const intensityReason = document.getElementById('intensityReason');
         if (intensityReason) intensityReason.innerText = sportData[currentSportName].intensity[currentMatchIntensity];
 
@@ -1282,16 +1550,16 @@
 
         const recommendationBoxElement = document.getElementById('recBox');
         if (recommendationBoxElement) recommendationBoxElement.className = `recommendation-box ${recommendationState}`;
-        
+
         const recTitle = document.getElementById('recTitle');
         if (recTitle) recTitle.innerText = recommendationTitleString;
-        
+
         const recReason = document.getElementById('recReason');
         if (recReason) recReason.innerText = recommendationReasonString;
 
         const timerSection = document.getElementById('timerSection');
         if (timerSection) timerSection.style.display = (recommendationState === 'GREEN') ? 'block' : 'none';
-        
+
         const actionSection = document.getElementById('actionSection');
         if (actionSection) actionSection.style.display = (recommendationState === 'GREEN') ? 'block' : 'none';
       } catch (error) {
@@ -1310,33 +1578,33 @@
     }
 
     function leaveVenueImmediate() {
-       safeStorageClear();
-       window.location.reload();
+      safeStorageClear();
+      window.location.reload();
     }
 
     /* === SESSION MANAGEMENT === */
     function safeStorageSet(keyName, valueData) {
-      try { 
-        sessionStorage.setItem(keyName, valueData); 
-      } catch (error) { 
-        console.error('[FlowMatch Error]:', error); 
+      try {
+        sessionStorage.setItem(keyName, valueData);
+      } catch (error) {
+        console.error('[FlowMatch Error]:', error);
       }
     }
 
     function safeStorageGet(keyName) {
-      try { 
-        return sessionStorage.getItem(keyName); 
-      } catch (error) { 
-        console.error('[FlowMatch Error]:', error); 
-        return null; 
+      try {
+        return sessionStorage.getItem(keyName);
+      } catch (error) {
+        console.error('[FlowMatch Error]:', error);
+        return null;
       }
     }
 
     function safeStorageClear() {
-      try { 
-        sessionStorage.clear(); 
-      } catch (error) { 
-        console.error('[FlowMatch Error]:', error); 
+      try {
+        sessionStorage.clear();
+      } catch (error) {
+        console.error('[FlowMatch Error]:', error);
       }
     }
 
@@ -1356,7 +1624,7 @@
           safeStorageClear();
           const tError = document.getElementById('ticketError');
           if (tError) {
-             tError.innerText = "Your session expired. Please re-enter your ticket ID.";
+            tError.innerText = "Your session expired. Please re-enter your ticket ID.";
           }
           showScreen('login-screen');
         } else {
@@ -1381,7 +1649,7 @@
       const ticketInput = document.getElementById('ticketInput');
       if (!ticketInput) return false;
       const ticketIdValue = sanitizeInput(ticketInput.value.trim());
-      
+
       const errorElement = document.getElementById('ticketError');
       if (!ticketIdValue) {
         if (errorElement) errorElement.innerText = "Please enter your ticket ID";
@@ -1400,9 +1668,9 @@
       if (!validateTicketId()) return;
 
       const ticketInput = document.getElementById('ticketInput');
-      if(!ticketInput) return;
+      if (!ticketInput) return;
       const ticketIdValue = sanitizeInput(ticketInput.value.trim());
-      
+
       const idParts = ticketIdValue.split('-');
       const seatInformation = idParts.length > 1 ? idParts[idParts.length - 1].toUpperCase() : ticketIdValue.toUpperCase();
       const sectionMatchResult = seatInformation.match(/[A-Z]/);
@@ -1434,35 +1702,35 @@
 
     function setupDashboardEnvironment(seatString, entranceGate, nearestFoodCourt) {
       const wText = document.getElementById('welcomeText');
-      if(wText) wText.textContent = `Welcome, Seat [${seatString}] — ${entranceGate}`;
-      
+      if (wText) wText.textContent = `Welcome, Seat [${seatString}] — ${entranceGate}`;
+
       const gText = document.getElementById('gateText');
-      if(gText) gText.textContent = `Your Gate: ${entranceGate}`;
-      
+      if (gText) gText.textContent = `Your Gate: ${entranceGate}`;
+
       const zText = document.getElementById('zoneText');
-      if(zText) zText.textContent = `Your Nearest Zone: ${nearestFoodCourt}`;
+      if (zText) zText.textContent = `Your Nearest Zone: ${nearestFoodCourt}`;
 
       showScreen('dashboard-screen');
       isDashboardVisible = true;
       renderSportTabs();
-      
+
       randomizeAllStates();
       startContinuousRandomizers();
     }
 
     function leaveVenue() {
       const seatSection = safeStorageGet('seatSection');
-      if(seatSection) trackVenueExit(seatSection);
+      if (seatSection) trackVenueExit(seatSection);
 
       const seatString = safeStorageGet('seatStr');
       const exitSeatText = document.getElementById('exitSeatText');
       if (exitSeatText) exitSeatText.textContent = `Session ended for Seat [${seatString}]`;
-      
+
       showScreen('exit-screen');
 
       isDashboardVisible = false;
       lastRecommendationState = null;
-      
+
       clearInterval(matchIntervalId);
       clearInterval(zoneIntervalId);
       clearInterval(recommendationIntervalId);
@@ -1576,10 +1844,10 @@
       let displaySeconds = currentTimerValue % 60;
       const tValue = document.getElementById('timerValue');
       if (tValue) tValue.innerText = `${displayMinutes}:${displaySeconds < 10 ? '0' : ''}${displaySeconds}`;
-      
+
       let progressPercentage = (currentTimerValue / 240) * 100;
       const pBar = document.getElementById('progressBar');
-      if(pBar) pBar.style.width = `${progressPercentage}%`;
+      if (pBar) pBar.style.width = `${progressPercentage}%`;
     }
 
     function onCountdownZero() {
@@ -1594,10 +1862,10 @@
       debounceTimer = setTimeout(() => {
         const ticketInput = document.getElementById('ticketInput');
         if (ticketInput) {
-           const ticketIdValue = ticketInput.value.trim();
-           if (ticketIdValue) {
-              validateTicketId();
-           }
+          const ticketIdValue = ticketInput.value.trim();
+          if (ticketIdValue) {
+            validateTicketId();
+          }
         }
       }, 300);
     }
@@ -1656,34 +1924,34 @@
       if (urlParams.get('debug') === 'true') {
         const debugPanel = document.getElementById('debugPanel');
         if (debugPanel) debugPanel.style.display = 'block';
-        
+
         const resultsDiv = document.getElementById('testResults');
         if (resultsDiv) resultsDiv.innerHTML = '';
-        
+
         const tInput = document.getElementById('ticketInput');
         const tError = document.getElementById('ticketError');
-        
+
         if (tInput && tError) {
           let originalVal = tInput.value;
-          
+
           tInput.value = '';
           let isValid1 = validateTicketId();
           logTest("Empty ticket input shows error", !isValid1 && tError.innerText.includes("Please enter your ticket ID"));
-          
+
           tInput.value = 'wrong-format';
           let isValid2 = validateTicketId();
           logTest("Wrong format shows error", !isValid2 && tError.innerText.includes("Format should be"));
-          
+
           tInput.value = 'IPL-2026-A12';
           let isValid3 = validateTicketId();
           logTest("Correct format IPL-2026-A12 passes", isValid3 && tError.innerText === '');
-          
+
           safeStorageSet('test_key', 'test_val');
           logTest("sessionStorage saves ticket correctly", safeStorageGet('test_key') === 'test_val');
-          
+
           safeStorageClear();
           logTest("Leave Venue clears sessionStorage correctly", safeStorageGet('test_key') === null);
-          
+
           tInput.value = originalVal;
         }
       }
@@ -1721,6 +1989,63 @@
     });
 
     window.onload = initializeApp;
+  </script>
+
+  <div class="fm-bottom-bar">
+    <button class="fm-tab active" onclick="fmSelectTab(this)">
+      <div class="fm-tab-dot"></div>
+      <span class="fm-tab-icon">🏠</span>
+      <span class="fm-tab-label">Home</span>
+    </button>
+    <button class="fm-tab" onclick="fmSelectTab(this)">
+      <div class="fm-tab-dot"></div>
+      <span class="fm-tab-icon">🗺️</span>
+      <span class="fm-tab-label">Zones</span>
+    </button>
+    <button class="fm-tab" onclick="fmSelectTab(this)">
+      <div class="fm-tab-dot"></div>
+      <span class="fm-tab-icon">🚗</span>
+      <span class="fm-tab-label">Escape</span>
+    </button>
+    <button class="fm-tab" onclick="fmSelectTab(this)">
+      <div class="fm-tab-dot"></div>
+      <span class="fm-tab-icon">👥</span>
+      <span class="fm-tab-label">Sync</span>
+    </button>
+    <button class="fm-tab" onclick="fmSelectTab(this)">
+      <div class="fm-tab-dot"></div>
+      <span class="fm-tab-icon">🍔</span>
+      <span class="fm-tab-label">Queue</span>
+    </button>
+  </div>
+
+  <script>
+    document.getElementById('fmThemeToggle').addEventListener('click', function () {
+      const isLight = document.body.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.body.removeAttribute('data-theme');
+        this.textContent = '🌙';
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+        this.textContent = '☀️';
+      }
+    });
+
+    function fmSelectTab(clickedBtn) {
+      document.querySelectorAll('.fm-tab').forEach(btn => btn.classList.remove('active'));
+      clickedBtn.classList.add('active');
+    }
+
+    setInterval(function () {
+      const seatSection = sessionStorage.getItem('seatSection');
+      const badge = document.getElementById('fmSeatBadge');
+      if (seatSection) {
+        badge.textContent = seatSection;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }, 1000);
   </script>
 </body>
 
