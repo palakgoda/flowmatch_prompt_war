@@ -1388,6 +1388,78 @@
     body[data-theme="light"] .esc-recommendation { background: rgba(255, 255, 255, 0.8) !important; border-color: #00000015 !important; }
     body[data-theme="light"] .esc-rec-details { color: #333 !important; }
     body[data-theme="light"] .esc-timeline-labels { color: black !important; }
+
+    /* SYNC TAB CSS */
+    #sync-tab-content {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      overflow-y: auto;
+      padding: 16px;
+      box-sizing: border-box;
+      margin: 0;
+      width: 100%;
+      height: auto;
+      display: none;
+      flex-direction: column;
+      z-index: 50;
+    }
+    .sync-input-group { margin-bottom: 20px; }
+    .sync-label { display: block; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
+    .sync-label.green { color: #00ff88; }
+    .sync-label.white { color: white; }
+    .sync-input { width: 100%; box-sizing: border-box; }
+    .sync-input[readonly] { background: rgba(255, 255, 255, 0.05); color: gray; cursor: not-allowed; }
+    
+    .sync-btn {
+      width: 100%;
+      background: #00ff88;
+      color: #000;
+      height: 48px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .sync-result-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+      box-sizing: border-box;
+      width: 100%;
+      display: none;
+      margin-bottom: 20px;
+    }
+    .sync-res-label { font-size: 12px; color: gray; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+    .sync-res-loc { font-size: 20px; color: white; font-weight: bold; margin-bottom: 16px; }
+    .sync-badges { display: flex; gap: 12px; margin-bottom: 20px; }
+    .sync-badge { flex: 1; border-radius: 8px; padding: 10px; background: rgba(255, 255, 255, 0.05); text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .sync-badge div:first-child { font-size: 11px; color: gray; margin-bottom: 4px; text-transform: uppercase; }
+    .sync-badge.you div:last-child { color: #00ff88; font-weight: bold; font-size: 16px; }
+    .sync-badge.friend div:last-child { color: #0088ff; font-weight: bold; font-size: 16px; }
+    
+    .sync-window-sect { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+    .sync-window-title { font-size: 12px; color: gray; margin-bottom: 12px; text-transform: uppercase; font-weight: bold; }
+    .sync-banner { padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; margin-bottom: 10px; }
+    .sync-banner.green { background: rgba(0, 255, 136, 0.2); color: #00ff88; border: 1px solid #00ff88; }
+    .sync-banner.red { background: rgba(255, 51, 85, 0.2); color: #ff3355; border: 1px solid #ff3355; }
+    .sync-banner.yellow { background: rgba(255, 204, 0, 0.2); color: #ffcc00; border: 1px solid #ffcc00; }
+    .sync-pulse { font-size: 12px; text-align: center; color: #ff3355; animation: pulseBusy 2s infinite; font-weight: bold; }
+
+    body[data-theme="light"] .sync-label.white { color: black !important; }
+    body[data-theme="light"] .sync-input[readonly] { background: rgba(0, 0, 0, 0.05) !important; color: #555 !important; }
+    body[data-theme="light"] .sync-result-card { background: rgba(255, 255, 255, 0.8) !important; border-color: #00000015 !important; }
+    body[data-theme="light"] .sync-res-loc { color: black !important; }
+    body[data-theme="light"] .sync-badge { background: rgba(0, 0, 0, 0.05) !important; border-color: #00000015 !important; }
+    body[data-theme="light"] .sync-pulse { color: #cc0000 !important; }
   </style>
 </head>
 
@@ -1593,6 +1665,48 @@
             <div class="esc-dot-leave" id="esc-dot-leave" style="left: 85%;"></div>
             <div class="esc-label-leave esc-dot-label" id="esc-label-leave" style="left: 85%;">Best exit</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sync Tab Content -->
+    <div id="sync-tab-content">
+      <div style="margin-top: 10px; margin-bottom: 24px;">
+        <div style="font-weight: bold; color: white; font-size: 20px;">👥 Find Your Squad</div>
+        <div style="color: gray; font-size: 13px; margin-top: 4px;">Meet friends without the chaos</div>
+      </div>
+
+      <div class="sync-input-group">
+        <label class="sync-label green">Your Ticket ID</label>
+        <input type="text" class="sync-input" id="sync-my-ticket" readonly value="" />
+      </div>
+
+      <div class="sync-input-group">
+        <label class="sync-label white">Friend's Ticket ID</label>
+        <input type="text" class="sync-input" id="sync-friend-ticket" placeholder="e.g. IPL-2026-D22" />
+        <div id="sync-error" style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: 5px; min-height: 20px;"></div>
+      </div>
+
+      <button class="sync-btn" onclick="findMeetingPoint()">Find Meeting Point &rarr;</button>
+
+      <div class="sync-result-card" id="sync-result-card">
+        <div class="sync-res-label">📍 Best Meeting Point</div>
+        <div class="sync-res-loc" id="sync-res-loc">Your Nearest Food Court</div>
+        
+        <div class="sync-badges">
+          <div class="sync-badge you">
+            <div>You</div>
+            <div id="sync-walk-you">2 mins</div>
+          </div>
+          <div class="sync-badge friend">
+            <div>Friend</div>
+            <div id="sync-walk-friend">2 mins</div>
+          </div>
+        </div>
+
+        <div class="sync-window-sect">
+          <div class="sync-window-title">Perfect Window</div>
+          <div id="sync-banner-cont"></div>
         </div>
       </div>
     </div>
@@ -2049,6 +2163,7 @@
         lastRecommendationState = newRecommendationState;
         trackRecommendation(newRecommendationState, currentSportName);
         renderDashboardUI(newRecommendationState, recommendationTitleString, recommendationReasonString);
+        if (typeof updateSyncRecommendation === 'function') updateSyncRecommendation();
       }
     }
 
@@ -2266,26 +2381,113 @@
       const db = document.getElementById('dashboard-screen');
       const zc = document.getElementById('zones-tab-content');
       const esc = document.getElementById('escape-tab-content');
-      if (db && zc && esc) {
+      const syn = document.getElementById('sync-tab-content');
+      if (db && zc && esc && syn) {
         if (label === 'Home') {
           db.style.display = 'flex';
           zc.style.display = 'none';
           esc.style.display = 'none';
+          syn.style.display = 'none';
         } else if (label === 'Zones') {
           db.style.display = 'none';
           zc.style.display = 'flex';
           esc.style.display = 'none';
+          syn.style.display = 'none';
           updateZonesTabMap();
         } else if (label === 'Escape') {
           db.style.display = 'none';
           zc.style.display = 'none';
           esc.style.display = 'flex';
+          syn.style.display = 'none';
           selectTransport(currentSelectedTransport);
+        } else if (label === 'Sync') {
+          db.style.display = 'none';
+          zc.style.display = 'none';
+          esc.style.display = 'none';
+          syn.style.display = 'flex';
+          const myT = document.getElementById('sync-my-ticket');
+          if(myT && !myT.value) {
+            myT.value = safeStorageGet('ticketId') || 'IPL-2026-A12';
+          }
         } else {
           db.style.display = 'none';
           zc.style.display = 'none';
           esc.style.display = 'none';
+          syn.style.display = 'none';
         }
+      }
+    }
+
+    function findMeetingPoint() {
+      const myT = document.getElementById('sync-my-ticket').value.trim();
+      const frT = document.getElementById('sync-friend-ticket').value.trim();
+      const err = document.getElementById('sync-error');
+      
+      err.innerText = '';
+      if(!frT) {
+        err.innerText = "Please enter your friend's ticket ID";
+        return;
+      }
+      
+      const regex = /^IPL-2026-([A-Z])\d+$/i;
+      const matchMe = myT.match(regex);
+      const matchFr = frT.match(regex);
+      
+      if(!matchFr) {
+        err.innerText = "Format should be: IPL-2026-D22";
+        return;
+      }
+      
+      const mySec = matchMe ? matchMe[1].toUpperCase() : 'A';
+      const frSec = matchFr[1].toUpperCase();
+
+      const secDiff = Math.abs(mySec.charCodeAt(0) - frSec.charCodeAt(0));
+
+      let loc = '';
+      let walkYou = '';
+      let walkFr = '';
+
+      if (secDiff === 0) {
+        loc = "Your Nearest Food Court";
+        walkYou = "2 mins";
+        walkFr = "2 mins";
+      } else if (secDiff === 1) {
+        loc = "Concourse Central Area";
+        walkYou = "3 mins";
+        walkFr = "3 mins";
+      } else {
+        loc = "Gate C Main Entrance Area";
+        walkYou = "4 mins";
+        walkFr = "4 mins";
+      }
+
+      document.getElementById('sync-res-loc').innerText = loc;
+      document.getElementById('sync-walk-you').innerText = walkYou;
+      document.getElementById('sync-walk-friend').innerText = walkFr;
+
+      updateSyncRecommendation();
+      document.getElementById('sync-result-card').style.display = 'block';
+    }
+
+    function updateSyncRecommendation() {
+      const bannerCont = document.getElementById('sync-banner-cont');
+      if(!bannerCont) return;
+
+      const card = document.getElementById('sync-result-card');
+      if(card.style.display !== 'block') return;
+
+      if(lastRecommendationState === 'GREEN') {
+        bannerCont.innerHTML = `<div class="sync-banner green">Go now! Match is in low phase</div>`;
+      } else if(lastRecommendationState === 'YELLOW') {
+        bannerCont.innerHTML = `<div class="sync-banner yellow">Move fast, window closing</div>`;
+      } else {
+        bannerCont.innerHTML = `
+          <div class="sync-banner red">Wait for next LOW window</div>
+          <div class="sync-pulse">Next window in approx 8 mins</div>
+          <div class="sync-banner yellow" style="margin-top: 15px; text-align: left;">
+            ⚠️ Stay seated.<br><span style="font-weight: normal; font-size: 13px; color: white;">Coordinate during next break.</span>
+          </div>
+        `;
       }
     }
 
