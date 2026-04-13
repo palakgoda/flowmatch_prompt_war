@@ -1240,6 +1240,85 @@
     body[data-theme="light"] .zone-card {
       background: rgba(255, 255, 255, 0.6) !important;
     }
+
+    /* ZONES TAB CSS */
+    body[data-theme="light"] .zs-detail-card,
+    body[data-theme="light"] .zs-btn {
+      border-color: #00000015 !important;
+    }
+    body[data-theme="light"] .zs-detail-card {
+      background: rgba(255, 255, 255, 0.8) !important;
+    }
+    body[data-theme="light"] .zs-title-section div,
+    body[data-theme="light"] .zs-detail-name,
+    body[data-theme="light"] .zs-detail-text {
+      color: #000 !important;
+    }
+
+    #zones-tab-content {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      overflow-y: auto;
+      padding: 16px;
+      box-sizing: border-box;
+      margin: 0;
+      width: 100%;
+      height: auto;
+      display: none;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .zs-map {
+      width: 280px;
+      height: 180px;
+      border: 2px solid #ffffff20;
+      border-radius: 50%;
+      position: relative;
+      margin: 20px auto;
+    }
+
+    .zs-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .zs-btn .material-icons {
+      font-size: 20px;
+      color: white;
+    }
+
+    @keyframes pulseBusy {
+      0% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 51, 85, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0); }
+    }
+
+    .zs-btn.BUSY { background: #ff3355; animation: pulseBusy 2s infinite; }
+    .zs-btn.MODERATE { background: #ffcc00; }
+    .zs-btn.CLEAR { background: #00ff88; }
+
+    .zs-detail-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 10px;
+      backdrop-filter: blur(15px);
+      box-sizing: border-box;
+    }
   </style>
 </head>
 
@@ -1373,6 +1452,33 @@
         <div id="backMessage" class="back-message"></div>
       </section>
 
+    </div>
+
+    <!-- Zones Tab Content -->
+    <div id="zones-tab-content">
+      <div class="zs-title-section" style="text-align: center; margin-top: 10px;">
+        <div style="font-weight: bold; color: white; font-size: 20px;">🗺️ Stadium Zones</div>
+        <div style="color: gray; font-size: 13px; margin-top: 4px;">Tap a zone to see live details</div>
+      </div>
+
+      <div class="zs-map">
+        <button class="zs-btn" id="zs-map-food" style="top:10px; left:50%; transform: translateX(-50%);" onclick="selectZone('Food Court')"><span class="material-icons">restaurant</span></button>
+        <button class="zs-btn" id="zs-map-toilets" style="top:50%; left:5px; transform: translateY(-50%);" onclick="selectZone('Toilets')"><span class="material-icons">wc</span></button>
+        <button class="zs-btn" id="zs-map-entry" style="bottom:10px; left:20%;" onclick="selectZone('Entry Gate')"><span class="material-icons">login</span></button>
+        <button class="zs-btn" id="zs-map-exit" style="bottom:10px; right:20%;" onclick="selectZone('Exit Gate')"><span class="material-icons">logout</span></button>
+        <button class="zs-btn" id="zs-map-concourse" style="top:50%; right:5px; transform: translateY(-50%);" onclick="selectZone('Concourse')"><span class="material-icons">people</span></button>
+      </div>
+      
+      <div class="zs-detail-card" id="zs-detail-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+          <div id="zs-d-name" style="font-weight: bold; font-size: 18px; color: white;">Food Court</div>
+          <div id="zs-d-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; color: black; background: #00ff88;">CLEAR</div>
+        </div>
+        <div id="zs-d-wait" style="font-size: 14px; margin: 8px 0; color: #ddd;">Estimated wait: 0-2 mins</div>
+        <div id="zs-d-best" style="font-size: 14px; margin: 8px 0; color: #ddd;">Best time to visit: When match is LOW</div>
+        <div id="zs-d-walk" style="font-size: 14px; margin: 8px 0; color: #ddd;">Your walk time: 2-4 mins from your gate</div>
+        <div id="zs-d-tip" style="color: gray; font-style: italic; font-size: 13px; margin-top: 12px;">Perfect time to go right now!</div>
+      </div>
     </div>
 
     <!-- Exit Screen -->
@@ -1761,6 +1867,9 @@
       venueZonesArray.forEach(zoneConfig => {
         currentVenueZonesData[zoneConfig.key] = venueZoneStates[Math.floor(Math.random() * venueZoneStates.length)];
       });
+      if (typeof updateZonesTabMap === 'function') {
+        updateZonesTabMap();
+      }
     }
 
     function randomizeAllStates() {
@@ -2034,6 +2143,71 @@
     function fmSelectTab(clickedBtn) {
       document.querySelectorAll('.fm-tab').forEach(btn => btn.classList.remove('active'));
       clickedBtn.classList.add('active');
+      const label = clickedBtn.querySelector('.fm-tab-label').innerText.trim();
+      const db = document.getElementById('dashboard-screen');
+      const zc = document.getElementById('zones-tab-content');
+      if (db && zc) {
+        if (label === 'Home') {
+          db.style.display = 'flex';
+          zc.style.display = 'none';
+        } else if (label === 'Zones') {
+          db.style.display = 'none';
+          zc.style.display = 'flex';
+          updateZonesTabMap();
+        } else {
+          db.style.display = 'none';
+          zc.style.display = 'none';
+        }
+      }
+    }
+
+    let currentlySelectedZone = 'Food Court';
+
+    function selectZone(zoneKey) {
+      currentlySelectedZone = zoneKey;
+      const state = currentVenueZonesData[zoneKey] || 'CLEAR';
+      let waitTime = '0-2 mins';
+      let tip = 'Perfect time to go right now!';
+      let color = '#00ff88';
+
+      if (state === 'BUSY') {
+        waitTime = (Math.floor(Math.random() * 6) + 15) + ' mins';
+        tip = 'Come back during next LOW window';
+        color = '#ff3355';
+      } else if (state === 'MODERATE') {
+        waitTime = (Math.floor(Math.random() * 6) + 5) + ' mins';
+        tip = 'Manageable now, move quickly';
+        color = '#ffcc00';
+      }
+
+      document.getElementById('zs-d-name').innerText = zoneKey;
+      const bge = document.getElementById('zs-d-badge');
+      bge.innerText = state;
+      bge.style.background = color;
+      bge.style.color = (state === 'MODERATE' || state === 'CLEAR') ? 'black' : 'white';
+      document.getElementById('zs-d-wait').innerText = `Estimated wait: ${waitTime}`;
+      document.getElementById('zs-d-best').innerText = `Best time to visit: When match is LOW`;
+      document.getElementById('zs-d-walk').innerText = 'Your walk time: 2-4 mins from your gate';
+      document.getElementById('zs-d-tip').innerText = tip;
+    }
+
+    function updateZonesTabMap() {
+      const m = {
+        'Food Court': 'zs-map-food',
+        'Toilets': 'zs-map-toilets',
+        'Entry Gate': 'zs-map-entry',
+        'Exit Gate': 'zs-map-exit',
+        'Concourse': 'zs-map-concourse'
+      };
+      for(let key in m) {
+        const btn = document.getElementById(m[key]);
+        if(btn) {
+          btn.className = 'zs-btn ' + (currentVenueZonesData[key] || 'CLEAR');
+        }
+      }
+      if (document.getElementById('zones-tab-content') && document.getElementById('zones-tab-content').style.display === 'flex') {
+        selectZone(currentlySelectedZone);
+      }
     }
 
     setInterval(function () {
