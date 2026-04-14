@@ -20,8 +20,10 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; 
+  font-src https://fonts.gstatic.com; 
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="no-referrer">
   <meta charset="UTF-8">
@@ -209,6 +211,7 @@
       overflow: hidden;
       display: none;
     }
+
     #login-screen.active {
       display: flex;
     }
@@ -500,41 +503,7 @@
     }
 
     /* Sport Tabs */
-    .tabs-container {
-      display: flex;
-      justify-content: space-between;
-      background: #111;
-      padding: 2px;
-      border-radius: 12px;
-      width: 100%;
-      box-sizing: border-box;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #222;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
-      margin-bottom: 0;
-      height: 32px;
-      flex-shrink: 0;
-    }
 
-    .tab {
-      background: transparent;
-      border: none;
-      color: #666;
-      padding: 6px 12px;
-      cursor: pointer;
-      font-weight: 800;
-      transition: all 0.3s ease;
-      font-family: inherit;
-      font-size: 11px;
-      flex: 1;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
 
     .tab:hover {
       color: #aaa;
@@ -590,7 +559,8 @@
       flex-direction: column;
     }
 
-    .intensity-panel, .zones-panel {
+    .intensity-panel,
+    .zones-panel {
       width: 50%;
       height: 100%;
     }
@@ -673,9 +643,20 @@
       animation: eqBounce ease-in-out infinite alternate;
     }
 
-    .eq-bar:nth-child(1) { height: 100%; animation-delay: 0s; }
-    .eq-bar:nth-child(2) { height: 60%; animation-delay: 0.15s; }
-    .eq-bar:nth-child(3) { height: 80%; animation-delay: 0.3s; }
+    .eq-bar:nth-child(1) {
+      height: 100%;
+      animation-delay: 0s;
+    }
+
+    .eq-bar:nth-child(2) {
+      height: 60%;
+      animation-delay: 0.15s;
+    }
+
+    .eq-bar:nth-child(3) {
+      height: 80%;
+      animation-delay: 0.3s;
+    }
 
     .intensity-card.HIGH .eq-bar {
       background: var(--deep-red);
@@ -756,9 +737,17 @@
       border-radius: 50%;
     }
 
-    .zone-status-text.CLEAR { background: var(--neon-green); }
-    .zone-status-text.MODERATE { background: var(--yellow); }
-    .zone-status-text.BUSY { background: var(--deep-red); }
+    .zone-status-text.CLEAR {
+      background: var(--neon-green);
+    }
+
+    .zone-status-text.MODERATE {
+      background: var(--yellow);
+    }
+
+    .zone-status-text.BUSY {
+      background: var(--deep-red);
+    }
 
     .zone-bar-bg {
       display: none;
@@ -845,9 +834,17 @@
       letter-spacing: -1px;
     }
 
-    .recommendation-box.GREEN .rec-title { color: var(--neon-green); }
-    .recommendation-box.RED .rec-title { color: var(--deep-red); }
-    .recommendation-box.YELLOW .rec-title { color: var(--yellow); }
+    .recommendation-box.GREEN .rec-title {
+      color: var(--neon-green);
+    }
+
+    .recommendation-box.RED .rec-title {
+      color: var(--deep-red);
+    }
+
+    .recommendation-box.YELLOW .rec-title {
+      color: var(--yellow);
+    }
 
     .rec-reason {
       font-size: 13px;
@@ -985,7 +982,7 @@
     ::-webkit-scrollbar {
       display: none;
     }
-    
+
     html,
     body {
       overflow: hidden !important;
@@ -1030,6 +1027,7 @@
       justify-content: center;
       text-align: center;
     }
+
     #exit-screen.active {
       display: flex;
     }
@@ -1246,9 +1244,11 @@
     body[data-theme="light"] .zs-btn {
       border-color: #00000015 !important;
     }
+
     body[data-theme="light"] .zs-detail-card {
       background: rgba(255, 255, 255, 0.8) !important;
     }
+
     body[data-theme="light"] .zs-title-section div,
     body[data-theme="light"] .zs-detail-name,
     body[data-theme="light"] .zs-detail-text {
@@ -1301,14 +1301,31 @@
     }
 
     @keyframes pulseBusy {
-      0% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 51, 85, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(255, 51, 85, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 51, 85, 0);
+      }
     }
 
-    .zs-btn.BUSY { background: #ff3355; animation: pulseBusy 2s infinite; }
-    .zs-btn.MODERATE { background: #ffcc00; }
-    .zs-btn.CLEAR { background: #00ff88; }
+    .zs-btn.BUSY {
+      background: #ff3355;
+      animation: pulseBusy 2s infinite;
+    }
+
+    .zs-btn.MODERATE {
+      background: #ffcc00;
+    }
+
+    .zs-btn.CLEAR {
+      background: #00ff88;
+    }
 
     .zs-detail-card {
       background: var(--glass-bg);
@@ -1337,12 +1354,14 @@
       flex-direction: column;
       z-index: 50;
     }
+
     .esc-transport-grid {
       display: flex;
       width: 100%;
       gap: 12px;
       margin: 16px 0;
     }
+
     .esc-card {
       flex: 1;
       padding: 16px 8px;
@@ -1353,12 +1372,22 @@
       background: #12121a;
       transition: all 0.3s ease;
     }
+
     .esc-card.active {
       border-color: #00ff88;
       background: rgba(0, 255, 136, 0.1);
     }
-    .esc-card div:first-child { font-size: 28px; margin-bottom: 8px; }
-    .esc-card div:last-child { font-size: 12px; font-weight: bold; color: white; }
+
+    .esc-card div:first-child {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .esc-card div:last-child {
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
 
     .esc-recommendation {
       background: var(--glass-bg);
@@ -1370,24 +1399,117 @@
       width: 100%;
       margin-bottom: 20px;
     }
-    .esc-rec-title { color: #00ff88; font-weight: bold; font-size: 22px; margin-bottom: 15px; }
-    .esc-rec-details { list-style: none; padding: 0; margin: 0; color: #ddd; font-size: 14px; line-height: 1.8; }
-    
-    .esc-timeline { width: 100%; margin-top: 20px; position: relative; }
-    .esc-timeline-labels { display: flex; justify-content: space-between; color: white; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-    .esc-bar-track { height: 4px; background: #ffffff20; border-radius: 2px; position: relative; width: 100%; }
-    .esc-bar-fill { height: 100%; background: #00ff88; border-radius: 2px; width: 60%; position: absolute; left: 0; top: 0; }
-    .esc-dot-now { width: 12px; height: 12px; background: #00ff88; border-radius: 50%; position: absolute; top: -4px; left: 60%; transform: translateX(-50%); }
-    .esc-dot-leave { width: 12px; height: 12px; background: #ff3355; border-radius: 50%; position: absolute; top: -4px; transform: translateX(-50%); transition: left 0.3s ease; }
-    .esc-dot-label { position: absolute; top: 12px; transform: translateX(-50%); font-size: 10px; white-space: nowrap; }
-    .esc-label-now { color: #00ff88; left: 60%; }
-    .esc-label-leave { color: #ff3355; transition: left 0.3s ease; }
 
-    body[data-theme="light"] .esc-card:not(.active) { background: rgba(255, 255, 255, 0.6) !important; border-color: #00000015 !important; }
-    body[data-theme="light"] .esc-card div:last-child { color: black !important; }
-    body[data-theme="light"] .esc-recommendation { background: rgba(255, 255, 255, 0.8) !important; border-color: #00000015 !important; }
-    body[data-theme="light"] .esc-rec-details { color: #333 !important; }
-    body[data-theme="light"] .esc-timeline-labels { color: black !important; }
+    .esc-rec-title {
+      color: #00ff88;
+      font-weight: bold;
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    .esc-rec-details {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .esc-timeline {
+      width: 100%;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    .esc-timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .esc-bar-track {
+      height: 4px;
+      background: #ffffff20;
+      border-radius: 2px;
+      position: relative;
+      width: 100%;
+    }
+
+    .esc-bar-fill {
+      height: 100%;
+      background: #00ff88;
+      border-radius: 2px;
+      width: 60%;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .esc-dot-now {
+      width: 12px;
+      height: 12px;
+      background: #00ff88;
+      border-radius: 50%;
+      position: absolute;
+      top: -4px;
+      left: 60%;
+      transform: translateX(-50%);
+    }
+
+    .esc-dot-leave {
+      width: 12px;
+      height: 12px;
+      background: #ff3355;
+      border-radius: 50%;
+      position: absolute;
+      top: -4px;
+      transform: translateX(-50%);
+      transition: left 0.3s ease;
+    }
+
+    .esc-dot-label {
+      position: absolute;
+      top: 12px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .esc-label-now {
+      color: #00ff88;
+      left: 60%;
+    }
+
+    .esc-label-leave {
+      color: #ff3355;
+      transition: left 0.3s ease;
+    }
+
+    body[data-theme="light"] .esc-card:not(.active) {
+      background: rgba(255, 255, 255, 0.6) !important;
+      border-color: #00000015 !important;
+    }
+
+    body[data-theme="light"] .esc-card div:last-child {
+      color: black !important;
+    }
+
+    body[data-theme="light"] .esc-recommendation {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border-color: #00000015 !important;
+    }
+
+    body[data-theme="light"] .esc-rec-details {
+      color: #333 !important;
+    }
+
+    body[data-theme="light"] .esc-timeline-labels {
+      color: black !important;
+    }
 
     /* SYNC TAB CSS */
     #sync-tab-content {
@@ -1406,13 +1528,37 @@
       flex-direction: column;
       z-index: 50;
     }
-    .sync-input-group { margin-bottom: 20px; }
-    .sync-label { display: block; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
-    .sync-label.green { color: #00ff88; }
-    .sync-label.white { color: white; }
-    .sync-input { width: 100%; box-sizing: border-box; }
-    .sync-input[readonly] { background: rgba(255, 255, 255, 0.05); color: gray; cursor: not-allowed; }
-    
+
+    .sync-input-group {
+      margin-bottom: 20px;
+    }
+
+    .sync-label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .sync-label.green {
+      color: #00ff88;
+    }
+
+    .sync-label.white {
+      color: white;
+    }
+
+    .sync-input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .sync-input[readonly] {
+      background: rgba(255, 255, 255, 0.05);
+      color: gray;
+      cursor: not-allowed;
+    }
+
     .sync-btn {
       width: 100%;
       background: #00ff88;
@@ -1426,7 +1572,7 @@
       margin-bottom: 20px;
       transition: all 0.3s ease;
     }
-    
+
     .sync-result-card {
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
@@ -1438,28 +1584,132 @@
       display: none;
       margin-bottom: 20px;
     }
-    .sync-res-label { font-size: 12px; color: gray; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-    .sync-res-loc { font-size: 20px; color: white; font-weight: bold; margin-bottom: 16px; }
-    .sync-badges { display: flex; gap: 12px; margin-bottom: 20px; }
-    .sync-badge { flex: 1; border-radius: 8px; padding: 10px; background: rgba(255, 255, 255, 0.05); text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); }
-    .sync-badge div:first-child { font-size: 11px; color: gray; margin-bottom: 4px; text-transform: uppercase; }
-    .sync-badge.you div:last-child { color: #00ff88; font-weight: bold; font-size: 16px; }
-    .sync-badge.friend div:last-child { color: #0088ff; font-weight: bold; font-size: 16px; }
-    
-    .sync-window-sect { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
-    .sync-window-title { font-size: 12px; color: gray; margin-bottom: 12px; text-transform: uppercase; font-weight: bold; }
-    .sync-banner { padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; margin-bottom: 10px; }
-    .sync-banner.green { background: rgba(0, 255, 136, 0.2); color: #00ff88; border: 1px solid #00ff88; }
-    .sync-banner.red { background: rgba(255, 51, 85, 0.2); color: #ff3355; border: 1px solid #ff3355; }
-    .sync-banner.yellow { background: rgba(255, 204, 0, 0.2); color: #ffcc00; border: 1px solid #ffcc00; }
-    .sync-pulse { font-size: 12px; text-align: center; color: #ff3355; animation: pulseBusy 2s infinite; font-weight: bold; }
 
-    body[data-theme="light"] .sync-label.white { color: black !important; }
-    body[data-theme="light"] .sync-input[readonly] { background: rgba(0, 0, 0, 0.05) !important; color: #555 !important; }
-    body[data-theme="light"] .sync-result-card { background: rgba(255, 255, 255, 0.8) !important; border-color: #00000015 !important; }
-    body[data-theme="light"] .sync-res-loc { color: black !important; }
-    body[data-theme="light"] .sync-badge { background: rgba(0, 0, 0, 0.05) !important; border-color: #00000015 !important; }
-    body[data-theme="light"] .sync-pulse { color: #cc0000 !important; }
+    .sync-res-label {
+      font-size: 12px;
+      color: gray;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sync-res-loc {
+      font-size: 20px;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .sync-badges {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .sync-badge {
+      flex: 1;
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sync-badge div:first-child {
+      font-size: 11px;
+      color: gray;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .sync-badge.you div:last-child {
+      color: #00ff88;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .sync-badge.friend div:last-child {
+      color: #0088ff;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .sync-window-sect {
+      margin-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 15px;
+    }
+
+    .sync-window-title {
+      font-size: 12px;
+      color: gray;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .sync-banner {
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .sync-banner.green {
+      background: rgba(0, 255, 136, 0.2);
+      color: #00ff88;
+      border: 1px solid #00ff88;
+    }
+
+    .sync-banner.red {
+      background: rgba(255, 51, 85, 0.2);
+      color: #ff3355;
+      border: 1px solid #ff3355;
+    }
+
+    .sync-banner.yellow {
+      background: rgba(255, 204, 0, 0.2);
+      color: #ffcc00;
+      border: 1px solid #ffcc00;
+    }
+
+    .sync-pulse {
+      font-size: 12px;
+      text-align: center;
+      color: #ff3355;
+      animation: pulseBusy 2s infinite;
+      font-weight: bold;
+    }
+
+    body[data-theme="light"] .sync-label.white {
+      color: black !important;
+    }
+
+    body[data-theme="light"] .sync-input[readonly] {
+      background: rgba(0, 0, 0, 0.05) !important;
+      color: #555 !important;
+    }
+
+    body[data-theme="light"] .sync-result-card {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border-color: #00000015 !important;
+    }
+
+    body[data-theme="light"] .sync-res-loc {
+      color: black !important;
+    }
+
+    body[data-theme="light"] .sync-badge {
+      background: rgba(0, 0, 0, 0.05) !important;
+      border-color: #00000015 !important;
+    }
+
+    body[data-theme="light"] .sync-pulse {
+      color: #cc0000 !important;
+    }
   </style>
 </head>
 
@@ -1603,22 +1853,32 @@
       </div>
 
       <div class="zs-map">
-        <button class="zs-btn" id="zs-map-food" style="top:10px; left:50%; transform: translateX(-50%);" onclick="selectZone('Food Court')"><span class="material-icons">restaurant</span></button>
-        <button class="zs-btn" id="zs-map-toilets" style="top:50%; left:5px; transform: translateY(-50%);" onclick="selectZone('Toilets')"><span class="material-icons">wc</span></button>
-        <button class="zs-btn" id="zs-map-entry" style="bottom:10px; left:20%;" onclick="selectZone('Entry Gate')"><span class="material-icons">login</span></button>
-        <button class="zs-btn" id="zs-map-exit" style="bottom:10px; right:20%;" onclick="selectZone('Exit Gate')"><span class="material-icons">logout</span></button>
-        <button class="zs-btn" id="zs-map-concourse" style="top:50%; right:5px; transform: translateY(-50%);" onclick="selectZone('Concourse')"><span class="material-icons">people</span></button>
+        <button class="zs-btn" id="zs-map-food" style="top:10px; left:50%; transform: translateX(-50%);"
+          onclick="selectZone('Food Court')"><span class="material-icons">restaurant</span></button>
+        <button class="zs-btn" id="zs-map-toilets" style="top:50%; left:5px; transform: translateY(-50%);"
+          onclick="selectZone('Toilets')"><span class="material-icons">wc</span></button>
+        <button class="zs-btn" id="zs-map-entry" style="bottom:10px; left:20%;" onclick="selectZone('Entry Gate')"><span
+            class="material-icons">login</span></button>
+        <button class="zs-btn" id="zs-map-exit" style="bottom:10px; right:20%;" onclick="selectZone('Exit Gate')"><span
+            class="material-icons">logout</span></button>
+        <button class="zs-btn" id="zs-map-concourse" style="top:50%; right:5px; transform: translateY(-50%);"
+          onclick="selectZone('Concourse')"><span class="material-icons">people</span></button>
       </div>
-      
+
       <div class="zs-detail-card" id="zs-detail-card">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
           <div id="zs-d-name" style="font-weight: bold; font-size: 18px; color: white;">Food Court</div>
-          <div id="zs-d-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; color: black; background: #00ff88;">CLEAR</div>
+          <div id="zs-d-badge"
+            style="font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; color: black; background: #00ff88;">
+            CLEAR</div>
         </div>
         <div id="zs-d-wait" style="font-size: 14px; margin: 8px 0; color: #ddd;">Estimated wait: 0-2 mins</div>
-        <div id="zs-d-best" style="font-size: 14px; margin: 8px 0; color: #ddd;">Best time to visit: When match is LOW</div>
-        <div id="zs-d-walk" style="font-size: 14px; margin: 8px 0; color: #ddd;">Your walk time: 2-4 mins from your gate</div>
-        <div id="zs-d-tip" style="color: gray; font-style: italic; font-size: 13px; margin-top: 12px;">Perfect time to go right now!</div>
+        <div id="zs-d-best" style="font-size: 14px; margin: 8px 0; color: #ddd;">Best time to visit: When match is LOW
+        </div>
+        <div id="zs-d-walk" style="font-size: 14px; margin: 8px 0; color: #ddd;">Your walk time: 2-4 mins from your gate
+        </div>
+        <div id="zs-d-tip" style="color: gray; font-style: italic; font-size: 13px; margin-top: 12px;">Perfect time to
+          go right now!</div>
       </div>
     </div>
 
@@ -1650,7 +1910,8 @@
           <li>✅ Metro platform will be empty</li>
           <li>✅ Walk time to station: 8 mins</li>
           <li>⚠️ If you leave at end: 35 min wait</li>
-          <li>Current crowd at exit: <span id="esc-live-exit" style="color: #00ff88; font-weight: bold;">CLEAR</span></li>
+          <li>Current crowd at exit: <span id="esc-live-exit" style="color: #00ff88; font-weight: bold;">CLEAR</span>
+          </li>
         </ul>
 
         <div class="esc-timeline">
@@ -1684,7 +1945,9 @@
       <div class="sync-input-group">
         <label class="sync-label white">Friend's Ticket ID</label>
         <input type="text" class="sync-input" id="sync-friend-ticket" placeholder="e.g. IPL-2026-D22" />
-        <div id="sync-error" style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: 5px; min-height: 20px;"></div>
+        <div id="sync-error"
+          style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: 5px; min-height: 20px;">
+        </div>
       </div>
 
       <button class="sync-btn" onclick="findMeetingPoint()">Find Meeting Point &rarr;</button>
@@ -1692,7 +1955,7 @@
       <div class="sync-result-card" id="sync-result-card">
         <div class="sync-res-label">📍 Best Meeting Point</div>
         <div class="sync-res-loc" id="sync-res-loc">Your Nearest Food Court</div>
-        
+
         <div class="sync-badges">
           <div class="sync-badge you">
             <div>You</div>
@@ -1714,9 +1977,11 @@
     <!-- Exit Screen -->
     <div id="exit-screen" class="screen">
       <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
-      <h1 style="font-size: 2rem; font-weight: bold; color: #00ff88; margin: 0 0 10px 0;">Thanks for using FlowMatch!</h1>
+      <h1 style="font-size: 2rem; font-weight: bold; color: #00ff88; margin: 0 0 10px 0;">Thanks for using FlowMatch!
+      </h1>
       <p id="exitSeatText" style="color: white; font-size: 1.2rem; margin: 5px 0;">Session ended for Seat A12</p>
-      <p style="color: gray; margin-top: 20px;">See you at the next match! <span role="img" aria-label="cricket bat and ball" title="cricket bat and ball">🏏</span></p>
+      <p style="color: gray; margin-top: 20px;">See you at the next match! <span role="img"
+          aria-label="cricket bat and ball" title="cricket bat and ball">🏏</span></p>
     </div>
   </div>
 
@@ -1984,16 +2249,19 @@
     function validateTicketId() {
       const ticketInput = document.getElementById('ticketInput');
       if (!ticketInput) return false;
-      const ticketIdValue = sanitizeInput(ticketInput.value.trim());
+      const ticketIdValue = sanitizeInput(ticketInput.value.trim().toUpperCase());
 
       const errorElement = document.getElementById('ticketError');
       if (!ticketIdValue) {
         if (errorElement) errorElement.innerText = "Please enter your ticket ID";
         return false;
       }
-      const ticketFormatRegex = /^IPL-2026-[A-Z]\d+$/i;
+
+      // UPDATED REGEX: Allows IPL, CON, or F1 prefixes
+      const ticketFormatRegex = /^(IPL|CON|F1)-2026-[A-Z0-9]+$/i;
+
       if (!ticketFormatRegex.test(ticketIdValue)) {
-        if (errorElement) errorElement.innerText = "Format should be: IPL-2026-A12";
+        if (errorElement) errorElement.innerText = "Format: IPL-2026-A12 or CON-2026-ROCK";
         return false;
       }
       clearError();
@@ -2004,36 +2272,39 @@
       if (!validateTicketId()) return;
 
       const ticketInput = document.getElementById('ticketInput');
-      if (!ticketInput) return;
-      const ticketIdValue = sanitizeInput(ticketInput.value.trim());
+      const ticketIdValue = sanitizeInput(ticketInput.value.trim().toUpperCase());
 
-      const idParts = ticketIdValue.split('-');
-      const seatInformation = idParts.length > 1 ? idParts[idParts.length - 1].toUpperCase() : ticketIdValue.toUpperCase();
-      const sectionMatchResult = seatInformation.match(/[A-Z]/);
-      const seatSection = sectionMatchResult ? sectionMatchResult[0] : 'C';
-      const seatString = seatInformation;
+      // --- SMART DETECTION LOGIC ---
+      let detectedSport = 'Cricket';
+      let stadiumName = 'Narendra Modi Stadium'; // Default
 
-      let nearestFoodCourt, entranceGate;
-      switch (seatSection) {
-        case 'A': nearestFoodCourt = 'Food Court 1'; entranceGate = 'Gate A'; break;
-        case 'B': nearestFoodCourt = 'Food Court 2'; entranceGate = 'Gate B'; break;
-        case 'C': nearestFoodCourt = 'Food Court 3'; entranceGate = 'Gate C'; break;
-        case 'D': nearestFoodCourt = 'Food Court 4'; entranceGate = 'Gate D'; break;
-        case 'E': nearestFoodCourt = 'Food Court 5'; entranceGate = 'Gate E'; break;
-        default: nearestFoodCourt = 'Food Court 3'; entranceGate = 'Gate C'; break;
+      if (ticketIdValue.startsWith('IPL')) {
+        detectedSport = 'Cricket';
+        stadiumName = 'Wankhede Stadium, Mumbai';
+      } else if (ticketIdValue.startsWith('CON')) {
+        detectedSport = 'Concert';
+        stadiumName = 'Jio World Garden, Mumbai';
+      } else if (ticketIdValue.startsWith('F1')) {
+        detectedSport = 'F1';
+        stadiumName = 'Buddh International Circuit';
       }
 
+      const idParts = ticketIdValue.split('-');
+      const seatString = idParts[idParts.length - 1];
+      const seatSection = seatString.match(/[A-Z]/) ? seatString.match(/[A-Z]/)[0] : 'A';
+
+      // Save to session
       safeStorageSet('ticketId', ticketIdValue);
-      safeStorageSet('seatSection', seatSection);
+      safeStorageSet('currentSport', detectedSport);
+      safeStorageSet('stadium', stadiumName);
       safeStorageSet('seatStr', seatString);
-      safeStorageSet('foodCourt', nearestFoodCourt);
-      safeStorageSet('gate', entranceGate);
       safeStorageSet('entryTime', new Date().getTime());
-      safeStorageSet('currentSport', currentSportName);
 
+      currentSportName = detectedSport; // Set the global state
+
+      // Track and Move to Dashboard
       trackVenueEntry(seatSection);
-
-      setupDashboardEnvironment(seatString, entranceGate, nearestFoodCourt);
+      setupDashboardEnvironment(seatString, 'Gate ' + seatSection, 'Food Court ' + seatSection);
     }
 
     function setupDashboardEnvironment(seatString, entranceGate, nearestFoodCourt) {
@@ -2048,7 +2319,6 @@
 
       showScreen('dashboard-screen');
       isDashboardVisible = true;
-      renderSportTabs();
 
       randomizeAllStates();
       startContinuousRandomizers();
@@ -2406,7 +2676,7 @@
           esc.style.display = 'none';
           syn.style.display = 'flex';
           const myT = document.getElementById('sync-my-ticket');
-          if(myT && !myT.value) {
+          if (myT && !myT.value) {
             myT.value = safeStorageGet('ticketId') || 'IPL-2026-A12';
           }
         } else {
@@ -2422,22 +2692,22 @@
       const myT = document.getElementById('sync-my-ticket').value.trim();
       const frT = document.getElementById('sync-friend-ticket').value.trim();
       const err = document.getElementById('sync-error');
-      
+
       err.innerText = '';
-      if(!frT) {
+      if (!frT) {
         err.innerText = "Please enter your friend's ticket ID";
         return;
       }
-      
+
       const regex = /^IPL-2026-([A-Z])\d+$/i;
       const matchMe = myT.match(regex);
       const matchFr = frT.match(regex);
-      
-      if(!matchFr) {
+
+      if (!matchFr) {
         err.innerText = "Format should be: IPL-2026-D22";
         return;
       }
-      
+
       const mySec = matchMe ? matchMe[1].toUpperCase() : 'A';
       const frSec = matchFr[1].toUpperCase();
 
@@ -2471,14 +2741,14 @@
 
     function updateSyncRecommendation() {
       const bannerCont = document.getElementById('sync-banner-cont');
-      if(!bannerCont) return;
+      if (!bannerCont) return;
 
       const card = document.getElementById('sync-result-card');
-      if(card.style.display !== 'block') return;
+      if (card.style.display !== 'block') return;
 
-      if(lastRecommendationState === 'GREEN') {
+      if (lastRecommendationState === 'GREEN') {
         bannerCont.innerHTML = `<div class="sync-banner green">Go now! Match is in low phase</div>`;
-      } else if(lastRecommendationState === 'YELLOW') {
+      } else if (lastRecommendationState === 'YELLOW') {
         bannerCont.innerHTML = `<div class="sync-banner yellow">Move fast, window closing</div>`;
       } else {
         bannerCont.innerHTML = `
@@ -2503,7 +2773,7 @@
       const detailsEl = document.getElementById('esc-rec-details');
       const dotL = document.getElementById('esc-dot-leave');
       const labL = document.getElementById('esc-label-leave');
-      
+
       const liveState = currentVenueZonesData['Exit Gate'] || 'CLEAR';
 
       if (vehicle === 'Metro') {
@@ -2513,10 +2783,10 @@
           <li>✅ Metro platform will be empty</li>
           <li>✅ Walk time to station: 8 mins</li>
           <li>⚠️ If you leave at end: 35 min wait</li>
-          <li>Current crowd at exit: <span style="color: ${liveState==='BUSY'?'#ff3355':liveState==='MODERATE'?'#ffcc00':'#00ff88'}; font-weight: bold;">${liveState}</span></li>
+          <li>Current crowd at exit: <span style="color: ${liveState === 'BUSY' ? '#ff3355' : liveState === 'MODERATE' ? '#ffcc00' : '#00ff88'}; font-weight: bold;">${liveState}</span></li>
         `;
-        if(dotL) dotL.style.left = '85%';
-        if(labL) labL.style.left = '85%';
+        if (dotL) dotL.style.left = '85%';
+        if (labL) labL.style.left = '85%';
       } else if (vehicle === 'Cab') {
         titleEl.innerText = 'Leave at Over 19.4';
         titleEl.style.color = '#00ff88';
@@ -2525,8 +2795,8 @@
           <li>✅ Current cab wait: 3 mins</li>
           <li>⚠️ If you leave at end: 22 min wait</li>
         `;
-        if(dotL) dotL.style.left = '90%';
-        if(labL) labL.style.left = '90%';
+        if (dotL) dotL.style.left = '90%';
+        if (labL) labL.style.left = '90%';
       } else if (vehicle === 'Own Car') {
         titleEl.innerText = 'Stay Till End';
         titleEl.style.color = '#00ff88';
@@ -2535,8 +2805,8 @@
           <li>✅ Avoid exit before 10 mins post match</li>
           <li>⚠️ Current parking crowd: MODERATE</li>
         `;
-        if(dotL) dotL.style.left = '100%';
-        if(labL) labL.style.left = '100%';
+        if (dotL) dotL.style.left = '100%';
+        if (labL) labL.style.left = '100%';
       }
     }
 
@@ -2578,9 +2848,9 @@
         'Exit Gate': 'zs-map-exit',
         'Concourse': 'zs-map-concourse'
       };
-      for(let key in m) {
+      for (let key in m) {
         const btn = document.getElementById(m[key]);
-        if(btn) {
+        if (btn) {
           btn.className = 'zs-btn ' + (currentVenueZonesData[key] || 'CLEAR');
         }
       }
