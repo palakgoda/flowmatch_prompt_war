@@ -1,0 +1,3082 @@
+<!--
+ * FlowMatch - Smart Stadium Experience App
+ * Version: 1.0.0
+ * Built with Google Antigravity
+ * 
+ * Description: AI-powered web app that tells 
+ * sporting event attendees the perfect moment 
+ * to leave their seat based on match intensity 
+ * and real-time venue crowd levels.
+ * 
+ * Features:
+ * - Ticket-based personalized session
+ * - Real-time match intensity simulation
+ * - Venue zone crowd level tracking
+ * - Smart break window recommendations
+ * - Safe window countdown timer
+ * - Auto session expiry on venue exit
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; 
+  font-src https://fonts.gstatic.com; 
+  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="no-referrer">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowMatch</title>
+
+    <!-- Google Services -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FLOWMATCH01"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-FLOWMATCH01');
+
+        function trackVenueEntry(seatSection) {
+            gtag('event', 'venue_entry', {
+                'seat_section': seatSection,
+                'timestamp': new Date().toISOString()
+            });
+        }
+
+        function trackRecommendation(status, sport) {
+            gtag('event', 'recommendation_shown', {
+                'status': status,
+                'sport': sport
+            });
+        }
+
+        function trackVenueExit(seatSection) {
+            gtag('event', 'venue_exit', {
+                'seat_section': seatSection
+            });
+        }
+    </script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* CSS Reset and Variables */
+        :root {
+            --bg-color: #000000;
+            --bg-gradient-1: #0d0015;
+            --bg-gradient-2: #000d2e;
+
+            --neon-green: #00ff88;
+            --deep-red: #ff3355;
+            --yellow: #ffcc00;
+            --cricket-color: #00ff88;
+            --football-color: #00bfff;
+            --f1-color: #ff3355;
+            --concert-color: #bf00ff;
+
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+
+            --glass-bg: rgba(20, 20, 25, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes bgShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            font-family: 'Outfit', 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2), #000000, var(--bg-gradient-1));
+            background-size: 300% 300%;
+            animation: bgShift 15s ease infinite;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating Particles */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            padding: 20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ------- LOGO & TAGLINE ------- */
+        h1.logo {
+            font-weight: 800;
+            font-size: 5rem;
+            margin: 0;
+            background: linear-gradient(to right, #00ff88, #00bfff, #bf00ff, #ff3355);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            animation: pulseGlow 3s infinite alternate;
+            letter-spacing: -2px;
+        }
+
+        @keyframes pulseGlow {
+            from {
+                filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+            }
+
+            to {
+                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+            }
+        }
+
+        .tagline {
+            color: #fff;
+            font-weight: 300;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            margin-bottom: 30px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        /* ------- LOGIN SCREEN ------- */
+        #login-screen {
+            justify-content: center;
+            height: 100vh;
+            align-items: center;
+            overflow: hidden;
+            display: none;
+        }
+
+        #login-screen.active {
+            display: flex;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            max-height: 90vh;
+            overflow: hidden;
+            border-radius: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 136, 0.1);
+            animation: borderPulse 4s infinite alternate;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes borderPulse {
+            0% {
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 255, 136, 0.1);
+                border-color: rgba(0, 255, 136, 0.1);
+            }
+
+            100% {
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 136, 0.3);
+                border-color: rgba(0, 255, 136, 0.4);
+            }
+        }
+
+        .login-card-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .login-card h2 {
+            color: white;
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin: 0 0 5px 0;
+            text-align: center;
+        }
+
+        .login-subtext {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Tabs inside Login Card */
+        .auth-tabs {
+            display: flex;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Scan QR Mock UI */
+        .qr-mock-area {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .qr-mock-area::before,
+        .qr-mock-area::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--neon-green);
+            pointer-events: none;
+        }
+
+        .qr-mock-area::before {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .qr-mock-area::after {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .camera-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .qr-text {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .qr-subtext {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 15px;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-size: 1.1rem;
+            font-family: inherit;
+            /* outline removed for accessibility */
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        ::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-main {
+            width: 100%;
+            background: var(--neon-green);
+            color: #000;
+            font-weight: 800;
+            padding: 18px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .btn-main:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            background: #1aff9d;
+        }
+
+        /* Feature Pills under login */
+        .feature-pills {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-footer-text {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 20px;
+        }
+
+        /* ------- DASHBOARD ======= */
+
+        /* Slim Top Nav */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 6px 16px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 40px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .user-details {
+            text-align: left;
+        }
+
+        #welcomeText {
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .small-info {
+            display: none;
+        }
+
+        .btn-leave {
+            background: transparent;
+            border: 1px solid var(--deep-red);
+            color: var(--deep-red);
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .btn-leave:hover {
+            background: var(--deep-red);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 51, 85, 0.4);
+        }
+
+        /* Sport Tabs */
+
+
+        .tab:hover {
+            color: #aaa;
+        }
+
+        .tab.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab.active[data-sport="Cricket"] {
+            text-shadow: 0 0 15px var(--cricket-color);
+            box-shadow: 0 2px 0 var(--cricket-color);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .tab.active[data-sport="Football"] {
+            text-shadow: 0 0 15px var(--football-color);
+            box-shadow: 0 2px 0 var(--football-color);
+            background: rgba(0, 191, 255, 0.1);
+        }
+
+        .tab.active[data-sport="F1"] {
+            text-shadow: 0 0 15px var(--f1-color);
+            box-shadow: 0 2px 0 var(--f1-color);
+            background: rgba(255, 51, 85, 0.1);
+        }
+
+        .tab.active[data-sport="Concert"] {
+            text-shadow: 0 0 15px var(--concert-color);
+            box-shadow: 0 2px 0 var(--concert-color);
+            background: rgba(191, 0, 255, 0.1);
+        }
+
+        /* Panels */
+        .dashboard-row-1 {
+            display: flex;
+            width: 100%;
+            gap: 16px;
+            height: 180px;
+            flex-shrink: 0;
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 0;
+            backdrop-filter: blur(15px);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .intensity-panel,
+        .zones-panel {
+            width: 50%;
+            height: 100%;
+        }
+
+        .panel h2 {
+            font-size: 12px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: left;
+            line-height: 1;
+        }
+
+        /* Intensity Panel */
+        .intensity-card {
+            border-radius: 8px;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .intensity-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .intensity-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+            letter-spacing: -2px;
+        }
+
+        .intensity-card.HIGH .intensity-title {
+            color: var(--deep-red);
+            text-shadow: 0 0 15px rgba(255, 51, 85, 0.5);
+        }
+
+        .intensity-card.MEDIUM .intensity-title {
+            color: var(--yellow);
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+        }
+
+        .intensity-card.LOW .intensity-title {
+            color: var(--neon-green);
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .intensity-reason {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.2;
+        }
+
+        /* EQ Anim */
+        .eq-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 44px;
+            padding-left: 12px;
+        }
+
+        .eq-bar {
+            width: 8px;
+            background: white;
+            border-radius: 4px 4px 0 0;
+            animation: eqBounce ease-in-out infinite alternate;
+        }
+
+        .eq-bar:nth-child(1) {
+            height: 100%;
+            animation-delay: 0s;
+        }
+
+        .eq-bar:nth-child(2) {
+            height: 60%;
+            animation-delay: 0.15s;
+        }
+
+        .eq-bar:nth-child(3) {
+            height: 80%;
+            animation-delay: 0.3s;
+        }
+
+        .intensity-card.HIGH .eq-bar {
+            background: var(--deep-red);
+            animation-duration: 0.3s;
+            box-shadow: 0 0 5px var(--deep-red);
+        }
+
+        .intensity-card.MEDIUM .eq-bar {
+            background: var(--yellow);
+            animation-duration: 0.6s;
+            box-shadow: 0 0 5px var(--yellow);
+        }
+
+        .intensity-card.LOW .eq-bar {
+            background: var(--neon-green);
+            animation-duration: 1.2s;
+            box-shadow: 0 0 5px var(--neon-green);
+        }
+
+        @keyframes eqBounce {
+            0% {
+                transform: scaleY(0.2);
+                transform-origin: bottom;
+            }
+
+            100% {
+                transform: scaleY(1);
+                transform-origin: bottom;
+            }
+        }
+
+        /* Zones Grid */
+        .zones-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .zone-card {
+            padding: 0;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0;
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            height: auto;
+        }
+
+        .zone-icon {
+            display: none;
+        }
+
+        .zone-name {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0;
+            font-weight: 600;
+            white-space: nowrap;
+            line-height: 2;
+        }
+
+        .zone-status-container {
+            width: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .zone-status-text {
+            font-weight: 800;
+            font-size: 0;
+            margin-bottom: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .zone-status-text.CLEAR {
+            background: var(--neon-green);
+        }
+
+        .zone-status-text.MODERATE {
+            background: var(--yellow);
+        }
+
+        .zone-status-text.BUSY {
+            background: var(--deep-red);
+        }
+
+        .zone-bar-bg {
+            display: none;
+        }
+
+        /* Recommendation Box */
+        .recommendation-box {
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 0;
+            transition: all 0.5s ease;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            border-left: 8px solid transparent;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .recommendation-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            filter: blur(20px);
+            opacity: 0.3;
+            z-index: -1;
+            animation: pulseBg 3s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            from {
+                opacity: 0.2;
+            }
+
+            to {
+                opacity: 0.5;
+            }
+        }
+
+        .recommendation-box.GREEN {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--neon-green);
+            border-left-color: var(--neon-green);
+            border-top: 1px solid rgba(0, 255, 136, 0.3);
+            border-right: 1px solid rgba(0, 255, 136, 0.3);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+            color: white;
+        }
+
+        .recommendation-box.RED {
+            background: rgba(255, 51, 85, 0.1);
+            border-color: var(--deep-red);
+            border-left-color: var(--deep-red);
+            border-top: 1px solid rgba(255, 51, 85, 0.3);
+            border-right: 1px solid rgba(255, 51, 85, 0.3);
+            border-bottom: 1px solid rgba(255, 51, 85, 0.3);
+            color: white;
+        }
+
+        .recommendation-box.YELLOW {
+            background: rgba(255, 204, 0, 0.1);
+            border-color: var(--yellow);
+            border-left-color: var(--yellow);
+            border-top: 1px solid rgba(255, 204, 0, 0.3);
+            border-right: 1px solid rgba(255, 204, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+            color: white;
+        }
+
+        .rec-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .recommendation-box.GREEN .rec-title {
+            color: var(--neon-green);
+        }
+
+        .recommendation-box.RED .rec-title {
+            color: var(--deep-red);
+        }
+
+        .recommendation-box.YELLOW .rec-title {
+            color: var(--yellow);
+        }
+
+        .rec-reason {
+            font-size: 13px;
+            font-weight: 400;
+            opacity: 0.9;
+            line-height: 1.2;
+        }
+
+        /* Timer Section */
+        .timer-section {
+            text-align: left;
+            margin-bottom: 0;
+            width: 100%;
+            height: auto;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .timer-text {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        #timerValue {
+            color: var(--neon-green);
+            font-weight: 800;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--neon-green);
+            width: 100%;
+            transition: width 1s linear;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .action-section {
+            text-align: center;
+            margin-bottom: 0;
+            width: 100%;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            height: 50px;
+            width: 100%;
+            padding: 0;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .back-message {
+            display: none !important;
+        }
+
+        .back-message.show {
+            display: none !important;
+        }
+
+        /* Exit Screen */
+        #exit-screen {
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        #exit-screen h1 {
+            font-size: 2.5rem;
+            color: var(--neon-green);
+            margin-bottom: 15px;
+        }
+
+        #exitSeatText {
+            font-size: 1.3rem;
+            color: white;
+            margin: 10px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        a:focus,
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus,
+        [tabindex]:focus {
+            outline: 2px solid #00ff88 !important;
+            outline-offset: 3px !important;
+        }
+
+        /* --- ADDED FLOWMATCH BARS CSS --- */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        html,
+        body {
+            overflow: hidden !important;
+            height: 100vh !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #main-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #dashboard-screen {
+            display: grid !important;
+            grid-template-columns: 1.2fr 1fr;
+            /* Left side wider for AI Voice */
+            grid-template-rows: auto 1fr;
+            gap: 24px;
+            max-width: 1200px !important;
+            /* Professional Desktop Width */
+            height: 80vh;
+            margin: 20px auto;
+            align-items: start;
+        }
+
+        .ai-intel-container {
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stadium-data-container {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .intel-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        #exit-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0a0f !important;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #exit-screen.active {
+            display: flex;
+        }
+
+        .fm-top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 56px;
+            background: #12121a;
+            border-bottom: 1px solid #ffffff15;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .fm-top-left,
+        .fm-top-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fm-logo-text {
+            font-weight: bold;
+            background: linear-gradient(90deg, #00ff88, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.2rem;
+        }
+
+        .fm-pulsing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: fm-pulse 1.5s infinite;
+        }
+
+        @keyframes fm-pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(0, 255, 136, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+            }
+        }
+
+        .fm-live-text {
+            font-size: 10px;
+            color: #00ff88;
+            letter-spacing: 2px;
+        }
+
+        .fm-theme-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fm-seat-badge {
+            background: #00ff88;
+            color: #000;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .fm-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: #12121a;
+            border-top: 1px solid #ffffff15;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .fm-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #8888aa;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            padding: 4px 10px;
+        }
+
+        .fm-tab.active {
+            color: #00ff88;
+        }
+
+        .fm-tab-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .fm-tab-label {
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .fm-tab-dot {
+            position: absolute;
+            top: -2px;
+            width: 4px;
+            height: 4px;
+            background: #00ff88;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .fm-tab.active .fm-tab-dot {
+            display: block;
+        }
+
+        /* LIGHT MODE CSS */
+        body[data-theme="light"] {
+            background: #e9e9f0 !important;
+        }
+
+        body[data-theme="light"] .fm-top-bar,
+        body[data-theme="light"] .fm-bottom-bar {
+            background: #ffffff;
+            border-color: #00000015;
+        }
+
+        body[data-theme="light"] .login-card h2,
+        body[data-theme="light"] .auth-tab.active,
+        body[data-theme="light"] .qr-text,
+        body[data-theme="light"] input[type="text"],
+        body[data-theme="light"] #welcomeText,
+        body[data-theme="light"] .tab.active,
+        body[data-theme="light"] .recommendation-box.GREEN,
+        body[data-theme="light"] .recommendation-box.RED,
+        body[data-theme="light"] .recommendation-box.YELLOW,
+        body[data-theme="light"] .btn-back,
+        body[data-theme="light"] #exitSeatText,
+        body[data-theme="light"] .zone-name,
+        body[data-theme="light"] .intensity-reason,
+        body[data-theme="light"] .timer-text,
+        body[data-theme="light"] .tagline,
+        body[data-theme="light"] .pill,
+        body[data-theme="light"] .login-footer-text,
+        body[data-theme="light"] .qr-subtext,
+        body[data-theme="light"] .rec-reason,
+        body[data-theme="light"] footer p,
+        body[data-theme="light"] .panel h2,
+        body[data-theme="light"] #exit-screen h1 {
+            color: #0a0a0f !important;
+        }
+
+        body[data-theme="light"] .tab:not(.active) {
+            color: #555 !important;
+        }
+
+        body[data-theme="light"] .login-card,
+        body[data-theme="light"] .auth-tabs,
+        body[data-theme="light"] .qr-mock-area,
+        body[data-theme="light"] input[type="text"],
+        body[data-theme="light"] .pill,
+        body[data-theme="light"] .top-nav,
+        body[data-theme="light"] .tabs-container,
+        body[data-theme="light"] .panel,
+        body[data-theme="light"] .zone-card,
+        body[data-theme="light"] .btn-back,
+        body[data-theme="light"] footer {
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .login-card,
+        body[data-theme="light"] .panel,
+        body[data-theme="light"] .top-nav,
+        body[data-theme="light"] .tabs-container {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        body[data-theme="light"] input[type="text"] {
+            background: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        body[data-theme="light"] .zone-card {
+            background: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        /* ZONES TAB CSS */
+        body[data-theme="light"] .zs-detail-card,
+        body[data-theme="light"] .zs-btn {
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .zs-detail-card {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        body[data-theme="light"] .zs-title-section div,
+        body[data-theme="light"] .zs-detail-name,
+        body[data-theme="light"] .zs-detail-text {
+            color: #000 !important;
+        }
+
+        #zones-tab-content {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 64px;
+            overflow-y: auto;
+            padding: 16px;
+            box-sizing: border-box;
+            margin: 0;
+            width: 100%;
+            height: auto;
+            display: none;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .zs-map {
+            width: 280px;
+            height: 180px;
+            border: 2px solid #ffffff20;
+            border-radius: 50%;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .zs-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .zs-btn .material-icons {
+            font-size: 20px;
+            color: white;
+        }
+
+        @keyframes pulseBusy {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 51, 85, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 85, 0);
+            }
+        }
+
+        .zs-btn.BUSY {
+            background: #ff3355;
+            animation: pulseBusy 2s infinite;
+        }
+
+        .zs-btn.MODERATE {
+            background: #ffcc00;
+        }
+
+        .zs-btn.CLEAR {
+            background: #00ff88;
+        }
+
+        .zs-detail-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 10px;
+            backdrop-filter: blur(15px);
+            box-sizing: border-box;
+        }
+
+        /* ESCAPE TAB CSS */
+        #escape-tab-content {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 64px;
+            overflow-y: auto;
+            padding: 16px;
+            box-sizing: border-box;
+            margin: 0;
+            width: 100%;
+            height: auto;
+            display: none;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .esc-transport-grid {
+            display: flex;
+            width: 100%;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .esc-card {
+            flex: 1;
+            padding: 16px 8px;
+            border-radius: 12px;
+            border: 2px solid #ffffff15;
+            text-align: center;
+            cursor: pointer;
+            background: #12121a;
+            transition: all 0.3s ease;
+        }
+
+        .esc-card.active {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .esc-card div:first-child {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .esc-card div:last-child {
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .esc-recommendation {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .esc-rec-title {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .esc-rec-details {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .esc-timeline {
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .esc-timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .esc-bar-track {
+            height: 4px;
+            background: #ffffff20;
+            border-radius: 2px;
+            position: relative;
+            width: 100%;
+        }
+
+        .esc-bar-fill {
+            height: 100%;
+            background: #00ff88;
+            border-radius: 2px;
+            width: 60%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .esc-dot-now {
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            border-radius: 50%;
+            position: absolute;
+            top: -4px;
+            left: 60%;
+            transform: translateX(-50%);
+        }
+
+        .esc-dot-leave {
+            width: 12px;
+            height: 12px;
+            background: #ff3355;
+            border-radius: 50%;
+            position: absolute;
+            top: -4px;
+            transform: translateX(-50%);
+            transition: left 0.3s ease;
+        }
+
+        .esc-dot-label {
+            position: absolute;
+            top: 12px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .esc-label-now {
+            color: #00ff88;
+            left: 60%;
+        }
+
+        .esc-label-leave {
+            color: #ff3355;
+            transition: left 0.3s ease;
+        }
+
+        body[data-theme="light"] .esc-card:not(.active) {
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .esc-card div:last-child {
+            color: black !important;
+        }
+
+        body[data-theme="light"] .esc-recommendation {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .esc-rec-details {
+            color: #333 !important;
+        }
+
+        body[data-theme="light"] .esc-timeline-labels {
+            color: black !important;
+        }
+
+        /* SYNC TAB CSS */
+        #sync-tab-content {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 64px;
+            overflow-y: auto;
+            padding: 16px;
+            box-sizing: border-box;
+            margin: 0;
+            width: 100%;
+            height: auto;
+            display: none;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .sync-input-group {
+            margin-bottom: 20px;
+        }
+
+        .sync-label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .sync-label.green {
+            color: #00ff88;
+        }
+
+        .sync-label.white {
+            color: white;
+        }
+
+        .sync-input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sync-input[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            color: gray;
+            cursor: not-allowed;
+        }
+
+        .sync-btn {
+            width: 100%;
+            background: #00ff88;
+            color: #000;
+            height: 48px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .sync-result-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-sizing: border-box;
+            width: 100%;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .sync-res-label {
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sync-res-loc {
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .sync-badges {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sync-badge {
+            flex: 1;
+            border-radius: 8px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sync-badge div:first-child {
+            font-size: 11px;
+            color: gray;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .sync-badge.you div:last-child {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .sync-badge.friend div:last-child {
+            color: #0088ff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .sync-window-sect {
+            margin-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        .sync-window-title {
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .sync-banner {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .sync-banner.green {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .sync-banner.red {
+            background: rgba(255, 51, 85, 0.2);
+            color: #ff3355;
+            border: 1px solid #ff3355;
+        }
+
+        .sync-banner.yellow {
+            background: rgba(255, 204, 0, 0.2);
+            color: #ffcc00;
+            border: 1px solid #ffcc00;
+        }
+
+        .sync-pulse {
+            font-size: 12px;
+            text-align: center;
+            color: #ff3355;
+            animation: pulseBusy 2s infinite;
+            font-weight: bold;
+        }
+
+        body[data-theme="light"] .sync-label.white {
+            color: black !important;
+        }
+
+        body[data-theme="light"] .sync-input[readonly] {
+            background: rgba(0, 0, 0, 0.05) !important;
+            color: #555 !important;
+        }
+
+        body[data-theme="light"] .sync-result-card {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .sync-res-loc {
+            color: black !important;
+        }
+
+        body[data-theme="light"] .sync-badge {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border-color: #00000015 !important;
+        }
+
+        body[data-theme="light"] .sync-pulse {
+            color: #cc0000 !important;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .recommendation-box .rec-title::before {
+            content: '✨';
+            /* Add a little spark */
+            display: inline-block;
+            animation: floating 2s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes pulseBorder {
+            0% {
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+
+            50% {
+                border-color: var(--neon-green);
+            }
+
+            100% {
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        .recommendation-box.RED {
+            background: rgba(255, 51, 85, 0.1);
+            border: 2px solid var(--deep-red) !important;
+            /* Force the red border */
+            color: white;
+        }
+
+        .recommendation-box.GREEN {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid var(--neon-green) !important;
+            /* Force the green border */
+            color: white;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            border-left: 2px solid var(--neon-green);
+            padding-left: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .ts {
+            color: var(--neon-green);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="fm-top-bar">
+        <div class="fm-top-left">
+            <div class="fm-logo-text">FlowMatch</div>
+            <div class="fm-pulsing-dot"></div>
+            <div class="fm-live-text">LIVE</div>
+        </div>
+        <div class="fm-top-right">
+            <button class="fm-theme-btn" id="fmThemeToggle">🌙</button>
+            <div class="fm-seat-badge" id="fmSeatBadge"></div>
+        </div>
+    </div>
+
+    <div id="main-content-wrapper">
+        <div class="particles-container" id="particlesContainer"></div>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="container screen">
+
+            <div class="login-card">
+                <div class="login-card-icon"><span role="img" aria-label="ticket" title="ticket">🎟️</span></div>
+                <h2>Scan or Enter Your Ticket</h2>
+                <div class="login-subtext">Your personal stadium AI activates instantly</div>
+
+                <div class="auth-tabs">
+                    <div class="auth-tab active" onclick="switchTab('enter-tab')">Enter Ticket ID</div>
+                    <div class="auth-tab" onclick="switchTab('scan-tab')">Scan QR</div>
+                </div>
+
+                <div id="enter-tab" class="tab-content active">
+                    <input type="text" id="ticketInput" maxlength="20" placeholder="e.g. IPL-2026-A12"
+                        oninput="debouncedValidate()" />
+                    <div id="ticketError"
+                        style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: -10px; margin-bottom: 15px; min-height: 20px;"
+                        role="alert" aria-live="assertive">></div>
+                    <button onclick="enterVenue()" class="btn-main" aria-label="Enter venue with your ticket ID">Enter
+                        Venue
+                        &rarr;</button>
+                </div>
+
+                <div id="scan-tab" class="tab-content">
+                    <div class="qr-mock-area">
+                        <div class="camera-icon"><span role="img" aria-label="camera" title="camera">📷</span></div>
+                        <div class="qr-text">Point your camera at your ticket QR code</div>
+                        <div class="qr-subtext">(In live venues, your ticket QR opens this automatically &mdash; no
+                            scanning needed)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-pills">
+                <span class="pill"><span role="img" aria-label="lightning bolt" title="lightning bolt">⚡</span>
+                    Real-time</span>
+                <span class="pill"><span role="img" aria-label="bullseye" title="bullseye">🎯</span> Personalized</span>
+                <span class="pill"><span role="img" aria-label="lock" title="lock">🔒</span> Session Only</span>
+            </div>
+
+            <div class="login-footer-text">
+                Your session ends automatically when you leave the venue
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="container screen">
+            <div class="ai-intel-container">
+                <div class="intel-card" style="flex: 1; min-height: 150px; padding: 15px;">
+                    <h2 style="font-size: 10px; opacity: 0.5; margin-bottom: 10px; letter-spacing: 2px;">SYSTEM
+                        INTELLIGENCE LOG
+                    </h2>
+                    <div id="logContainer"
+                        style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5;">
+                        <div class="log-entry"><span class="ts">[SYNC]</span> Initializing Aegis Core...</div>
+                    </div>
+                </div>
+
+                <div class="intel-card" id="recBox">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <div class="status-dot" style="width: 12px; height: 12px;"></div>
+                        <h2 style="font-size: 14px; letter-spacing: 2px; margin: 0; opacity: 0.6;">AI CORE ACTIVE</h2>
+                    </div>
+                    <h1 id="recTitle" style="font-size: 2.5rem; margin: 0 0 15px 0; font-weight: 800;">...</h1>
+                    <p id="recReason" style="font-size: 1.2rem; line-height: 1.6; opacity: 0.9;">Initializing smart
+                        assistance...
+                    </p>
+
+                    <div id="timerSection" style="margin-top: 30px; display: none;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="font-size: 12px;">WINDOW EXPIRY</span>
+                            <span id="timerValue" style="font-weight: bold; color: var(--neon-green);">4:00</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-back" onclick="imBack()" id="actionSection" style="display:none; height: 60px;">
+                    I'm Back at My Seat ✅
+                </button>
+            </div>
+
+            <div class="stadium-data-container">
+                <div class="intel-card">
+                    <h2 style="font-size: 11px; opacity: 0.5; margin-bottom: 15px;">MATCH INTENSITY SCAN</h2>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div id="intensityTitle" style="font-size: 2rem; font-weight: 800;">...</div>
+                            <div id="intensityReason" style="font-size: 0.9rem; opacity: 0.7;">...</div>
+                        </div>
+                        <div class="eq-bars">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="intel-card">
+                    <h2 style="font-size: 11px; opacity: 0.5; margin-bottom: 15px;">STADIUM ZONE SENSORS</h2>
+                    <div id="zonesGrid" class="zones-grid">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard-screen" class="container screen">
+
+            <div class="top-nav">
+                <div class="user-info">
+                    <div class="status-dot"></div>
+                    <div class="user-details">
+                        <div id="welcomeText">Welcome, Seat A12 — Gate A</div>
+                    </div>
+                </div>
+                <button onclick="leaveVenue()" class="btn-leave" aria-label="Leave venue and end your session"><span
+                        class="material-icons"
+                        style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">exit_to_app</span> Leave
+                    Venue</button>
+                <div class="small-info">
+                    <!-- Hidden logically but available to satisfy original JS -->
+                    <span id="gateText"></span><br />
+                    <span id="zoneText"></span>
+                </div>
+            </div>
+
+            <div class="tabs-container" id="tabsContainer">
+                <!-- Tabs rendered by JS -->
+            </div>
+
+            <div class="dashboard-row-1">
+                <section class="panel intensity-panel">
+                    <h2>MATCH INTENSITY</h2>
+                    <div class="intensity-card" id="intensityCard">
+                        <div class="intensity-content">
+                            <div class="intensity-title" id="intensityTitle">...</div>
+                            <div class="intensity-reason" id="intensityReason">...</div>
+                        </div>
+                        <div class="eq-bars">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel zones-panel">
+                    <h2>ZONES</h2>
+                    <div class="zones-grid" id="zonesGrid">
+                        <!-- Zones rendered by JS -->
+                    </div>
+                </section>
+            </div>
+
+            <section class="recommendation-box" id="recBox" role="status" aria-live="polite">
+                <div class="rec-title" id="recTitle">...</div>
+                <div class="rec-reason" id="recReason">...</div>
+            </section>
+
+            <section class="timer-section" id="timerSection" style="display:none;">
+                <div class="timer-text">Your safe window closes in <span id="timerValue">4:00</span></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </section>
+
+            <section class="action-section" id="actionSection" style="display:none;">
+                <button class="btn-back" onclick="imBack()" aria-label="Confirm you are back at your seat"><span
+                        class="material-icons"
+                        style="font-size:1.1rem; vertical-align:text-bottom; margin-right:4px;">event_seat</span> I'm
+                    Back at My
+                    Seat <span role="img" aria-label="check mark" title="check mark">✅</span></button>
+                <div id="backMessage" class="back-message"></div>
+            </section>
+
+        </div>
+
+        <!-- Zones Tab Content -->
+        <div id="zones-tab-content">
+            <div class="zs-title-section" style="text-align: center; margin-top: 10px;">
+                <div style="font-weight: bold; color: white; font-size: 20px;">🗺️ Stadium Zones</div>
+                <div style="color: gray; font-size: 13px; margin-top: 4px;">Tap a zone to see live details</div>
+            </div>
+
+            <div class="zs-map">
+                <button class="zs-btn" id="zs-map-food" style="top:10px; left:50%; transform: translateX(-50%);"
+                    onclick="selectZone('Food Court')"><span class="material-icons">restaurant</span></button>
+                <button class="zs-btn" id="zs-map-toilets" style="top:50%; left:5px; transform: translateY(-50%);"
+                    onclick="selectZone('Toilets')"><span class="material-icons">wc</span></button>
+                <button class="zs-btn" id="zs-map-entry" style="bottom:10px; left:20%;"
+                    onclick="selectZone('Entry Gate')"><span class="material-icons">login</span></button>
+                <button class="zs-btn" id="zs-map-exit" style="bottom:10px; right:20%;"
+                    onclick="selectZone('Exit Gate')"><span class="material-icons">logout</span></button>
+                <button class="zs-btn" id="zs-map-concourse" style="top:50%; right:5px; transform: translateY(-50%);"
+                    onclick="selectZone('Concourse')"><span class="material-icons">people</span></button>
+            </div>
+
+            <div class="zs-detail-card" id="zs-detail-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div id="zs-d-name" style="font-weight: bold; font-size: 18px; color: white;">Food Court</div>
+                    <div id="zs-d-badge"
+                        style="font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; color: black; background: #00ff88;">
+                        CLEAR</div>
+                </div>
+                <div id="zs-d-wait" style="font-size: 14px; margin: 8px 0; color: #ddd;">Estimated wait: 0-2 mins</div>
+                <div id="zs-d-best" style="font-size: 14px; margin: 8px 0; color: #ddd;">Best time to visit: When match
+                    is LOW
+                </div>
+                <div id="zs-d-walk" style="font-size: 14px; margin: 8px 0; color: #ddd;">Your walk time: 2-4 mins from
+                    your gate
+                </div>
+                <div id="zs-d-tip" style="color: gray; font-style: italic; font-size: 13px; margin-top: 12px;">Perfect
+                    time to
+                    go right now!</div>
+            </div>
+        </div>
+
+        <!-- Escape Tab Content -->
+        <div id="escape-tab-content">
+            <div style="margin-top: 10px;">
+                <div style="font-weight: bold; color: white; font-size: 20px;">🚗 Plan Your Exit</div>
+                <div style="color: gray; font-size: 13px; margin-top: 4px;">Beat the post-match rush</div>
+            </div>
+
+            <div class="esc-transport-grid">
+                <div class="esc-card active" onclick="selectTransport('Metro')" id="esc-card-Metro">
+                    <div>🚇</div>
+                    <div>Metro</div>
+                </div>
+                <div class="esc-card" onclick="selectTransport('Cab')" id="esc-card-Cab">
+                    <div>🚕</div>
+                    <div>Cab</div>
+                </div>
+                <div class="esc-card" onclick="selectTransport('Own Car')" id="esc-card-Own Car">
+                    <div>🚗</div>
+                    <div>Own Car</div>
+                </div>
+            </div>
+
+            <div class="esc-recommendation">
+                <div class="esc-rec-title" id="esc-rec-title">Leave at Over 19.2</div>
+                <ul class="esc-rec-details" id="esc-rec-details">
+                    <li>✅ Metro platform will be empty</li>
+                    <li>✅ Walk time to station: 8 mins</li>
+                    <li>⚠️ If you leave at end: 35 min wait</li>
+                    <li>Current crowd at exit: <span id="esc-live-exit"
+                            style="color: #00ff88; font-weight: bold;">CLEAR</span>
+                    </li>
+                </ul>
+
+                <div class="esc-timeline">
+                    <div class="esc-timeline-labels">
+                        <span>NOW</span>
+                        <span>MATCH END</span>
+                    </div>
+                    <div class="esc-bar-track">
+                        <div class="esc-bar-fill"></div>
+                        <div class="esc-dot-now"></div>
+                        <div class="esc-label-now esc-dot-label">You are here</div>
+                        <div class="esc-dot-leave" id="esc-dot-leave" style="left: 85%;"></div>
+                        <div class="esc-label-leave esc-dot-label" id="esc-label-leave" style="left: 85%;">Best exit
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sync Tab Content -->
+        <div id="sync-tab-content">
+            <div style="margin-top: 10px; margin-bottom: 24px;">
+                <div style="font-weight: bold; color: white; font-size: 20px;">👥 Find Your Squad</div>
+                <div style="color: gray; font-size: 13px; margin-top: 4px;">Meet friends without the chaos</div>
+            </div>
+
+            <div class="sync-input-group">
+                <label class="sync-label green">Your Ticket ID</label>
+                <input type="text" class="sync-input" id="sync-my-ticket" readonly value="" />
+            </div>
+
+            <div class="sync-input-group">
+                <label class="sync-label white">Friend's Ticket ID</label>
+                <input type="text" class="sync-input" id="sync-friend-ticket" placeholder="e.g. IPL-2026-D22" />
+                <div id="sync-error"
+                    style="color: var(--deep-red); font-size: 0.9rem; text-align: center; margin-top: 5px; min-height: 20px;">
+                </div>
+            </div>
+
+            <button class="sync-btn" onclick="findMeetingPoint()">Find Meeting Point &rarr;</button>
+
+            <div class="sync-result-card" id="sync-result-card">
+                <div class="sync-res-label">📍 Best Meeting Point</div>
+                <div class="sync-res-loc" id="sync-res-loc">Your Nearest Food Court</div>
+
+                <div class="sync-badges">
+                    <div class="sync-badge you">
+                        <div>You</div>
+                        <div id="sync-walk-you">2 mins</div>
+                    </div>
+                    <div class="sync-badge friend">
+                        <div>Friend</div>
+                        <div id="sync-walk-friend">2 mins</div>
+                    </div>
+                </div>
+
+                <div class="sync-window-sect">
+                    <div class="sync-window-title">Perfect Window</div>
+                    <div id="sync-banner-cont"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exit Screen -->
+        <div id="exit-screen" class="screen">
+            <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+            <h1 style="font-size: 2rem; font-weight: bold; color: #00ff88; margin: 0 0 10px 0;">Thanks for using
+                FlowMatch!
+            </h1>
+            <p id="exitSeatText" style="color: white; font-size: 1.2rem; margin: 5px 0;">Session ended for Seat A12</p>
+            <p style="color: gray; margin-top: 20px;">See you at the next match! <span role="img"
+                    aria-label="cricket bat and ball" title="cricket bat and ball">🏏</span></p>
+        </div>
+    </div>
+
+    <script>
+        /* === CONFIGURATION & CONSTANTS === */
+        const sportData = {
+            Cricket: {
+                intensity: { HIGH: "Batting powerplay - wicket likely soon", MEDIUM: "Mid over - steady play", LOW: "End of over - bowling change" },
+                events: ["Wicket Falls! 🏏", "Strategic Timeout", "Powerplay Over"],
+                recommendation: { RED: "High action phase. Wicket predicted.", YELLOW: "Steady play. Move if urgent.", GREEN: "Bowling change. 4 min window open!" }
+            },
+            Football: {
+                intensity: { HIGH: "Attacking third - goal chance", MEDIUM: "Midfield play", LOW: "Ball out of play" },
+                events: ["Penalty Kick! ⚽", "Half Time", "VAR Check"],
+                recommendation: { RED: "Goal scoring opportunity.", YELLOW: "Midfield battle.", GREEN: "Ball out of play. Quick break window!" }
+            },
+            F1: {
+                intensity: { HIGH: "Overtake imminent", MEDIUM: "Caution period", LOW: "Pit stop / Safety car" },
+                events: ["Lead Change! 🏎️", "Safety Car", "Pit Window Open"],
+                recommendation: { RED: "High speed battle.", YELLOW: "Caution flags out.", GREEN: "Safety car deployed. Relax and move." }
+            },
+            Concert: {
+                intensity: { HIGH: "Fan favorite song", MEDIUM: "B-side track", LOW: "Intermission" },
+                events: ["Encore! 🎸", "Instrumental Solo", "Outfit Change"],
+                recommendation: { RED: "Main hit playing.", YELLOW: "Artist performing deep cuts.", GREEN: "Artist talking. Go now!" }
+            }
+        };
+
+        const VENUE_CONFIG = {
+            'IPL': {
+                sport: 'Cricket',
+                venues: { 'WANKH': 'Wankhede, Mumbai', 'CHENN': 'Chepauk, Chennai', 'AHMED': 'Narendra Modi Stadium' },
+                persona: 'Captain 🏏',
+                theme: { primary: '#004BA0', accent: '#FFD700' } // Blue & Gold
+            },
+            'ISL': {
+                sport: 'Football',
+                venues: { 'KOCHI': 'JLN Stadium, Kochi', 'GOA': 'Fatorda Stadium', 'KOLKA': 'Salt Lake Stadium' },
+                persona: 'Coach ⚽',
+                theme: { primary: '#E21A22', accent: '#FFFFFF' } // Red & White
+            },
+            'F1': {
+                sport: 'F1',
+                venues: { 'BUDDH': 'Buddh Circuit, India', 'MONCO': 'Circuit de Monaco' },
+                persona: 'Crew Chief 🏎️',
+                theme: { primary: '#FF1801', accent: '#000000' } // Racing Red
+            },
+            'CON': {
+                sport: 'Concert',
+                venues: { 'MUMBA': 'Racecourse, Mumbai', 'GOYNG': 'Goyang Stadium, Korea' },
+                persona: 'Rockstar 🎸',
+                theme: { primary: '#BF00FF', accent: '#00D4FF' } // Neon Purple
+            }
+        };
+
+        const venueZonesArray = [
+            { key: 'Food Court', icon: '<span class="material-icons">restaurant</span>' },
+            { key: 'Toilets', icon: '<span class="material-icons">wc</span>' },
+            { key: 'Entry Gate', icon: '<span class="material-icons">login</span>' },
+            { key: 'Exit Gate', icon: '<span class="material-icons">logout</span>' },
+            { key: 'Concourse', icon: '<span class="material-icons">people</span>' }
+        ];
+
+        const matchIntensityLevels = ['HIGH', 'MEDIUM', 'LOW'];
+        const venueZoneStates = ['BUSY', 'MODERATE', 'CLEAR'];
+
+        let currentSportName = 'Cricket';
+        let currentMatchIntensity = 'LOW';
+        let currentVenueZonesData = {};
+
+        let matchIntervalId = null;
+        let zoneIntervalId = null;
+        let recommendationIntervalId = null;
+        let countdownIntervalId = null;
+
+        let currentTimerValue = 240;
+        let isSafeWindowActive = false;
+        let isDashboardVisible = false;
+        let lastRecommendationState = null;
+
+        /* === UI RENDERING === */
+        const particlesContainerElement = document.getElementById('particlesContainer');
+        let particlesList = [];
+        let particleAnimFrameId = null;
+
+        if (particlesContainerElement) {
+            for (let index = 0; index < 20; index++) {
+                let particleElement = document.createElement('div');
+                particleElement.className = 'particle';
+                let particleSize = Math.random() * 4 + 2;
+                particleElement.style.width = particleSize + 'px';
+                particleElement.style.height = particleSize + 'px';
+                particleElement.style.left = Math.random() * 100 + 'vw';
+
+                particlesList.push({
+                    el: particleElement,
+                    y: Math.random() * 100,
+                    speed: (Math.random() * 0.1) + 0.05
+                });
+                particlesContainerElement.appendChild(particleElement);
+            }
+            animateParticles();
+        }
+
+        function animateParticles() {
+            particlesList.forEach(p => {
+                p.y -= p.speed;
+                if (p.y < 0) p.y = 100;
+
+                let opacity = 0;
+                if (p.y > 80) opacity = (100 - p.y) / 20 * 0.6;
+                else if (p.y > 20) opacity = 0.6;
+                else opacity = (p.y / 20) * 0.6;
+
+                if (p.el) {
+                    p.el.style.transform = `translateY(${p.y}vh) scale(1)`;
+                    p.el.style.opacity = opacity;
+                }
+            });
+            particleAnimFrameId = requestAnimationFrame(animateParticles);
+        }
+
+        function switchTab(tabIdName) {
+            document.querySelectorAll('.auth-tab').forEach(tabElement => tabElement.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(contentElement => contentElement.classList.remove('active'));
+
+            if (tabIdName === 'enter-tab') {
+                const authTabs = document.querySelectorAll('.auth-tab');
+                if (authTabs.length > 0) authTabs[0].classList.add('active');
+                const enterTab = document.getElementById('enter-tab');
+                if (enterTab) enterTab.classList.add('active');
+            } else {
+                const authTabs = document.querySelectorAll('.auth-tab');
+                if (authTabs.length > 1) authTabs[1].classList.add('active');
+                const scanTab = document.getElementById('scan-tab');
+                if (scanTab) scanTab.classList.add('active');
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screenElement => screenElement.classList.remove('active'));
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) targetScreen.classList.add('active');
+
+            const topBar = document.querySelector('.fm-top-bar');
+            const bottomBar = document.querySelector('.fm-bottom-bar');
+            const wrapper = document.getElementById('main-content-wrapper');
+
+            if (topBar && bottomBar) {
+                if (screenId === 'dashboard-screen') {
+                    topBar.style.display = 'flex';
+                    bottomBar.style.display = 'flex';
+                } else {
+                    topBar.style.display = 'none';
+                    bottomBar.style.display = 'none';
+                }
+            }
+        }
+
+        function renderSportTabs() {
+            const sportNamesArray = ['Cricket', 'Football', 'F1', 'Concert'];
+            const tabsHTMLContent = sportNamesArray.map(sportName =>
+                `<button class="tab ${sportName === currentSportName ? 'active' : ''}" data-sport="${sportName}" onclick="setSportName('${sportName}')" aria-label="Select sport: ${sportName}">${sportName}</button>`
+            ).join('');
+            const tabsContainer = document.getElementById('tabsContainer');
+            if (tabsContainer) tabsContainer.innerHTML = tabsHTMLContent;
+        }
+
+        function renderDashboardUI(recommendationState, recommendationTitleString, recommendationReasonString) {
+            try {
+                const intensityCardElement = document.getElementById('intensityCard');
+                if (intensityCardElement) intensityCardElement.className = `intensity-card ${currentMatchIntensity}`;
+
+                const intensityTitle = document.getElementById('intensityTitle');
+                if (intensityTitle) intensityTitle.innerText = currentMatchIntensity;
+
+                const intensityReason = document.getElementById('intensityReason');
+                if (intensityReason) intensityReason.innerText = sportData[currentSportName].intensity[currentMatchIntensity];
+
+                let venueZonesHTMLContent = '';
+                venueZonesArray.forEach(zoneConfig => {
+                    const zoneStateValue = currentVenueZonesData[zoneConfig.key];
+                    venueZonesHTMLContent += `
+              <div class="zone-card">
+                  <div class="zone-icon">${zoneConfig.icon}</div>
+                  <div class="zone-name">${zoneConfig.key}</div>
+                  <div class="zone-status-container">
+                     <div class="zone-status-text ${zoneStateValue}">${zoneStateValue}</div>
+                     <div class="zone-bar-bg">
+                        <div class="zone-bar-fill ${zoneStateValue}"></div>
+                     </div>
+                  </div>
+              </div>
+          `;
+                });
+                const zonesGrid = document.getElementById('zonesGrid');
+                if (zonesGrid) zonesGrid.innerHTML = venueZonesHTMLContent;
+
+                const recommendationBoxElement = document.getElementById('recBox');
+                if (recommendationBoxElement) recommendationBoxElement.className = `recommendation-box ${recommendationState}`;
+
+                const recTitle = document.getElementById('recTitle');
+                if (recTitle) recTitle.innerText = recommendationTitleString;
+
+                const recReason = document.getElementById('recReason');
+                if (recReason) recReason.innerText = recommendationReasonString;
+
+                const timerSection = document.getElementById('timerSection');
+                if (timerSection) timerSection.style.display = (recommendationState === 'GREEN') ? 'block' : 'none';
+
+                const actionSection = document.getElementById('actionSection');
+                if (actionSection) actionSection.style.display = (recommendationState === 'GREEN') ? 'block' : 'none';
+            } catch (error) {
+                console.error('[FlowMatch Error]:', error);
+                const dashboard = document.getElementById('dashboard-screen');
+                if (dashboard) {
+                    dashboard.innerHTML = `
+            <div style="text-align:center; padding: 50px;">
+              <h2 style="color:var(--deep-red);">Something went wrong.</h2>
+              <p>Please refresh or re-enter your ticket ID.</p>
+              <button onclick="leaveVenueImmediate()" class="btn-main" style="margin-top:20px; width:auto; padding: 10px 30px;">Start Again</button>
+            </div>
+          `;
+                }
+            }
+        }
+
+        function leaveVenueImmediate() {
+            safeStorageClear();
+            window.location.reload();
+        }
+
+        /* === SESSION MANAGEMENT === */
+        function safeStorageSet(keyName, valueData) {
+            try {
+                sessionStorage.setItem(keyName, valueData);
+            } catch (error) {
+                console.error('[FlowMatch Error]:', error);
+            }
+        }
+
+        function safeStorageGet(keyName) {
+            try {
+                return sessionStorage.getItem(keyName);
+            } catch (error) {
+                console.error('[FlowMatch Error]:', error);
+                return null;
+            }
+        }
+
+        function safeStorageClear() {
+            try {
+                sessionStorage.clear();
+            } catch (error) {
+                console.error('[FlowMatch Error]:', error);
+            }
+        }
+
+        function initializeApp() {
+            venueZonesArray.forEach(zoneConfig => currentVenueZonesData[zoneConfig.key] = 'CLEAR');
+            checkExistingSession();
+            runTests();
+        }
+
+        function checkExistingSession() {
+            const savedEntryTime = safeStorageGet('entryTime');
+            const savedTicketId = safeStorageGet('ticketId');
+
+            if (savedTicketId && savedEntryTime) {
+                const currentTimestamp = new Date().getTime();
+                if (currentTimestamp - parseInt(savedEntryTime) > 4 * 60 * 60 * 1000) {
+                    safeStorageClear();
+                    const tError = document.getElementById('ticketError');
+                    if (tError) {
+                        tError.innerText = "Your session expired. Please re-enter your ticket ID.";
+                    }
+                    showScreen('login-screen');
+                } else {
+                    currentSportName = safeStorageGet('currentSport') || 'Cricket';
+                    const savedSeatString = safeStorageGet('seatStr');
+                    const savedGateName = safeStorageGet('gate');
+                    const savedFoodCourtName = safeStorageGet('foodCourt');
+
+                    setupDashboardEnvironment(savedSeatString, savedGateName, savedFoodCourtName);
+                }
+            } else {
+                showScreen('login-screen');
+            }
+        }
+
+        function sanitizeInput(value) {
+            if (!value) return '';
+            return value.replace(/[<>&"']/g, '');
+        }
+
+        function validateTicketId() {
+            const ticketInput = document.getElementById('ticketInput');
+            if (!ticketInput) return false;
+
+            // 1. Sanitize and convert to uppercase
+            const ticketIdValue = sanitizeInput(ticketInput.value.trim().toUpperCase());
+            const errorElement = document.getElementById('ticketError');
+
+            if (!ticketIdValue) {
+                if (errorElement) errorElement.innerText = "Please enter your ticket ID";
+                return false;
+            }
+
+            // 2. UNIVERSAL REGEX: Allows IPL, CON, F1, or ISL 
+            // Followed by any stadium code and any seat/VIP code
+            const ticketFormatRegex = /^(IPL|CON|F1|ISL)-[A-Z0-9]+-[A-Z0-9]+$/i;
+
+            if (!ticketFormatRegex.test(ticketIdValue)) {
+                if (errorElement) {
+                    errorElement.innerText = "Format: PREFIX-VENUE-SEAT (e.g. CON-MUMBA-VIP)";
+                }
+                return false;
+            }
+
+            // 3. Clear error if it passes
+            clearError();
+            return true;
+        }
+
+        function enterVenue() {
+            if (!validateTicketId()) return;
+
+            const ticketInput = document.getElementById('ticketInput');
+            const ticketId = ticketInput.value.trim().toUpperCase();
+            const parts = ticketId.split('-'); // Splits IPL-CHENN-A12 into [IPL, CHENN, A12]
+
+            const prefix = parts[0];
+            const venueCode = parts[1];
+            const seat = parts[2] || 'GA';
+            const gateName = 'Gate ' + seat.charAt(0);
+            safeStorageSet('gate', gateName);
+
+            const config = VENUE_CONFIG[prefix];
+            if (!config) return;
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').classList.add('active');
+            // Check if you used .style.display = 'grid' instead. They must match.
+
+            // Detect specific stadium from code, or use a fallback
+            const stadiumName = config.venues[venueCode] || "International Stadium";
+
+            // Apply Dynamic "Vibe" Theme
+            currentSportName = config.sport;
+            document.documentElement.style.setProperty('--neon-green', config.theme.primary);
+
+            // Save Universal Session Data
+            const seatSection = seat.match(/[A-Z]/) ? seat.match(/[A-Z]/)[0] : 'A';
+            safeStorageSet('ticketId', ticketId);
+            safeStorageSet('currentSport', config.sport);
+            safeStorageSet('stadium', stadiumName);
+            safeStorageSet('persona', config.persona);
+            safeStorageSet('seatStr', seat);
+            safeStorageSet('seatSection', seatSection);
+            safeStorageSet('entryTime', new Date().getTime());
+
+            // Track and load
+            trackVenueEntry(seatSection);
+            setupDashboardEnvironment(seat, gateName, 'Zone ' + seat.charAt(0));
+
+            addLog("Aegis Intelligence Core Online.");
+            startSimulation();
+        }
+
+        function setupDashboardEnvironment(seatString, entranceGate, nearestFoodCourt) {
+            const savedStadium = safeStorageGet('stadium') || 'Stadium Venue';
+
+            const wText = document.getElementById('welcomeText');
+            // Fix the "null" by using the variable directly
+            if (wText) wText.textContent = `Welcome, Seat [${seatString}] — ${entranceGate}`;
+
+            // Update the Top Logo Bar to show the venue
+            const logoText = document.querySelector('.fm-logo-text');
+            if (logoText) {
+                logoText.innerHTML = `FlowMatch <span style="opacity:0.3; margin: 0 10px;">|</span> <span style="font-weight:400; font-size: 0.9rem;">${savedStadium}</span>`;
+            }
+
+            const gText = document.getElementById('gateText');
+            if (gText) gText.textContent = `Your Gate: ${entranceGate}`;
+
+            document.querySelector('.fm-logo-text').innerText = `FlowMatch • ${savedStadium}`;
+
+            showScreen('dashboard-screen');
+            isDashboardVisible = true;
+
+            randomizeAllStates();
+            startContinuousRandomizers();
+        }
+
+        function leaveVenue() {
+            const seatSection = safeStorageGet('seatSection');
+            if (seatSection) trackVenueExit(seatSection);
+
+            const seatString = safeStorageGet('seatStr');
+            const exitSeatText = document.getElementById('exitSeatText');
+            if (exitSeatText) exitSeatText.textContent = `Session ended for Seat [${seatString}]`;
+
+            showScreen('exit-screen');
+
+            isDashboardVisible = false;
+            lastRecommendationState = null;
+
+            clearInterval(matchIntervalId);
+            clearInterval(zoneIntervalId);
+            clearInterval(recommendationIntervalId);
+            clearInterval(countdownIntervalId);
+
+            setTimeout(() => {
+                safeStorageClear();
+                const tInput = document.getElementById('ticketInput');
+                if (tInput) tInput.value = '';
+                showScreen('login-screen');
+            }, 3000);
+        }
+
+        function setSportName(newSportName) {
+            currentSportName = newSportName;
+            safeStorageSet('currentSport', newSportName);
+            renderSportTabs();
+            calculateRecommendation();
+        }
+
+        /* === MATCH SIMULATION ENGINE === */
+        function randomizeMatchIntensity() {
+            const data = sportData[currentSportName];
+            currentMatchIntensity = matchIntensityLevels[Math.floor(Math.random() * matchIntensityLevels.length)];
+
+            const logFeed = document.getElementById('logContainer'); // We'll add this UI element next
+            if (logFeed) {
+                const randomEvent = data.events[Math.floor(Math.random() * data.events.length)];
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                const ts = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                entry.innerHTML = `<span class="ts">[${ts}]</span> <span style="color:var(--neon-green)">LIVE UPDATE:</span> ${randomEvent}`;
+                logFeed.prepend(entry);
+                if (logFeed.children.length > 5) logFeed.lastChild.remove();
+            }
+        }
+
+        /* === CROWD SIMULATION ENGINE === */
+        function randomizeVenueZones() {
+            venueZonesArray.forEach(zoneConfig => {
+                currentVenueZonesData[zoneConfig.key] = venueZoneStates[Math.floor(Math.random() * venueZoneStates.length)];
+            });
+            if (typeof updateZonesTabMap === 'function') {
+                updateZonesTabMap();
+            }
+            if (typeof selectTransport === 'function' && document.getElementById('escape-tab-content') && document.getElementById('escape-tab-content').style.display === 'flex') {
+                selectTransport(currentSelectedTransport);
+            }
+        }
+
+        function randomizeAllStates() {
+            randomizeMatchIntensity();
+            randomizeVenueZones();
+            calculateRecommendation();
+        }
+
+        function startContinuousRandomizers() {
+            clearInterval(matchIntervalId);
+            clearInterval(zoneIntervalId);
+
+            matchIntervalId = setInterval(() => {
+                if (!isDashboardVisible) return;
+                randomizeMatchIntensity();
+                calculateRecommendation();
+            }, 15000);
+
+            zoneIntervalId = setInterval(() => {
+                if (!isDashboardVisible) return;
+                randomizeVenueZones();
+                calculateRecommendation();
+            }, 10000);
+        }
+
+        /* === RECOMMENDATION LOGIC === */
+        function calculateRecommendation() {
+            const personaName = safeStorageGet('persona') || 'AI Guide';
+            const savedGate = safeStorageGet('gate') || 'Gate A';
+
+            let newRecommendationState = 'YELLOW';
+            let recommendationTitleString = "MONITORING FLOW";
+
+            if (currentMatchIntensity === 'HIGH') {
+                newRecommendationState = 'RED';
+                recommendationTitleString = "STAY SEATED";
+                recommendationReasonString = sportData[currentSportName].recommendation.RED;
+            } else if (currentMatchIntensity === 'LOW' && currentVenueZonesData['Exit Gate'] !== 'BUSY') {
+                newRecommendationState = 'GREEN';
+                recommendationTitleString = "BREAK WINDOW OPEN";
+                recommendationReasonString = sportData[currentSportName].recommendation.GREEN;
+            }
+
+            const sessionTime = new Date().getTime() - parseInt(safeStorageGet('entryTime'));
+            if (sessionTime > 50000 && currentVenueZonesData['Exit Gate'] === 'BUSY') {
+                newRecommendationState = 'RED';
+                recommendationTitleString = "🚨 EXIT RUSH DETECTED";
+                recommendationReasonString = `Crowd surge at ${savedGate}. I've prepared a staggered exit route in the 'Escape' tab.`;
+            }
+
+            if (typeof updateSyncRecommendation === 'function') updateSyncRecommendation();
+        }
+
+        /* === TIMER MANAGEMENT === */
+        function startCountdownTimer() {
+            clearInterval(countdownIntervalId);
+            updateTimerDisplay();
+            countdownIntervalId = setInterval(() => {
+                currentTimerValue--;
+                if (currentTimerValue <= 0) {
+                    clearInterval(countdownIntervalId);
+                    onCountdownZero();
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let displayMinutes = Math.floor(currentTimerValue / 60);
+            let displaySeconds = currentTimerValue % 60;
+            const tValue = document.getElementById('timerValue');
+            if (tValue) tValue.innerText = `${displayMinutes}:${displaySeconds < 10 ? '0' : ''}${displaySeconds}`;
+
+            let progressPercentage = (currentTimerValue / 240) * 100;
+            const pBar = document.getElementById('progressBar');
+            if (pBar) pBar.style.width = `${progressPercentage}%`;
+        }
+
+        function onCountdownZero() {
+            randomizeAllStates();
+        }
+
+        /* === EVENT LISTENERS === */
+        let debounceTimer;
+        function debouncedValidate() {
+            clearError();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const ticketInput = document.getElementById('ticketInput');
+                if (ticketInput) {
+                    const ticketIdValue = ticketInput.value.trim();
+                    if (ticketIdValue) {
+                        validateTicketId();
+                    }
+                }
+            }, 300);
+        }
+
+        function clearError() {
+            const errorElement = document.getElementById('ticketError');
+            if (errorElement) errorElement.innerText = '';
+        }
+
+        function imBack() {
+            const messagesArray = [
+                { text: "<span role=\"img\" aria-label=\"check mark\" title=\"check mark\">✅</span> Good timing! You missed nothing important.", color: "var(--neon-green)" },
+                { text: "<span role=\"img\" aria-label=\"lightning bolt\" title=\"lightning bolt\">⚡</span> Close call! Big moment happened 40 seconds ago.", color: "var(--yellow)" }
+            ];
+            const randomMessage = messagesArray[Math.floor(Math.random() * messagesArray.length)];
+            const messageElement = document.getElementById('backMessage');
+            if (messageElement) {
+                messageElement.innerText = randomMessage.text;
+                messageElement.style.color = randomMessage.color;
+                messageElement.className = 'back-message show';
+                setTimeout(() => {
+                    messageElement.className = 'back-message';
+                }, 5000);
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(matchIntervalId);
+                clearInterval(zoneIntervalId);
+                clearInterval(recommendationIntervalId);
+                clearInterval(countdownIntervalId);
+                cancelAnimationFrame(particleAnimFrameId);
+            } else {
+                if (isDashboardVisible) {
+                    startContinuousRandomizers();
+                    if (isSafeWindowActive) {
+                        startCountdownTimer();
+                    }
+                }
+                animateParticles();
+            }
+        });
+
+        /* === TESTING SUITE === */
+        function logTest(name, passed) {
+            const resultsDiv = document.getElementById('testResults');
+            if (resultsDiv) {
+                const color = passed ? 'var(--neon-green)' : 'var(--deep-red)';
+                resultsDiv.innerHTML += `<div>${name}: <span style="color:${color}; font-weight:bold;">${passed ? 'PASS' : 'FAIL'}</span></div>`;
+            }
+        }
+
+        function runTests() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('debug') === 'true') {
+                const debugPanel = document.getElementById('debugPanel');
+                if (debugPanel) debugPanel.style.display = 'block';
+
+                const resultsDiv = document.getElementById('testResults');
+                if (resultsDiv) resultsDiv.innerHTML = '';
+
+                const tInput = document.getElementById('ticketInput');
+                const tError = document.getElementById('ticketError');
+
+                if (tInput && tError) {
+                    let originalVal = tInput.value;
+
+                    tInput.value = '';
+                    let isValid1 = validateTicketId();
+                    logTest("Empty ticket input shows error", !isValid1 && tError.innerText.includes("Please enter your ticket ID"));
+
+                    tInput.value = 'wrong-format';
+                    let isValid2 = validateTicketId();
+                    logTest("Wrong format shows error", !isValid2 && tError.innerText.includes("Format should be"));
+
+                    tInput.value = 'IPL-2026-A12';
+                    let isValid3 = validateTicketId();
+                    logTest("Correct format IPL-2026-A12 passes", isValid3 && tError.innerText === '');
+
+                    safeStorageSet('test_key', 'test_val');
+                    logTest("sessionStorage saves ticket correctly", safeStorageGet('test_key') === 'test_val');
+
+                    safeStorageClear();
+                    logTest("Leave Venue clears sessionStorage correctly", safeStorageGet('test_key') === null);
+
+                    tInput.value = originalVal;
+                }
+            }
+        }
+
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const loginScreen = document.getElementById('login-screen');
+                if (loginScreen && loginScreen.classList.contains('active')) {
+                    enterVenue();
+                }
+            }
+            if (e.key === 'Escape') {
+                const dbScreen = document.getElementById('dashboard-screen');
+                if (dbScreen && dbScreen.classList.contains('active')) {
+                    if (confirm("Are you sure you want to leave? Your session will end.")) {
+                        leaveVenue();
+                    }
+                }
+            }
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                const dbScreen = document.getElementById('dashboard-screen');
+                if (dbScreen && dbScreen.classList.contains('active')) {
+                    const sports = ['Cricket', 'Football', 'F1', 'Concert'];
+                    let currentIndex = sports.indexOf(currentSportName);
+                    if (e.key === 'ArrowRight') {
+                        currentIndex = (currentIndex + 1) % sports.length;
+                    } else {
+                        currentIndex = (currentIndex - 1 + sports.length) % sports.length;
+                    }
+                    setSportName(sports[currentIndex]);
+                }
+            }
+        });
+
+        window.onload = initializeApp;
+    </script>
+
+    <div class="fm-bottom-bar">
+        <button class="fm-tab active" onclick="fmSelectTab(this)">
+            <div class="fm-tab-dot"></div>
+            <span class="fm-tab-icon">🏠</span>
+            <span class="fm-tab-label">Home</span>
+        </button>
+        <button class="fm-tab" onclick="fmSelectTab(this)">
+            <div class="fm-tab-dot"></div>
+            <span class="fm-tab-icon">🛠️</span>
+            <span class="fm-tab-label">Service</span>
+        </button>
+        <button class="fm-tab" onclick="fmSelectTab(this)">
+            <div class="fm-tab-dot"></div>
+            <span class="fm-tab-icon">🚗</span>
+            <span class="fm-tab-label">Escape</span>
+        </button>
+        <button class="fm-tab" onclick="fmSelectTab(this)">
+            <div class="fm-tab-dot"></div>
+            <span class="fm-tab-icon">👥</span>
+            <span class="fm-tab-label">Sync</span>
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('fmThemeToggle').addEventListener('click', function () {
+            const isLight = document.body.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.body.removeAttribute('data-theme');
+                this.textContent = '🌙';
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                this.textContent = '☀️';
+            }
+        });
+
+        function fmSelectTab(clickedBtn) {
+            document.querySelectorAll('.fm-tab').forEach(btn => btn.classList.remove('active'));
+            clickedBtn.classList.add('active');
+            const label = clickedBtn.querySelector('.fm-tab-label').innerText.trim();
+            const db = document.getElementById('dashboard-screen');
+            const zc = document.getElementById('zones-tab-content');
+            const esc = document.getElementById('escape-tab-content');
+            const syn = document.getElementById('sync-tab-content');
+            if (db && zc && esc && syn) {
+                if (label === 'Home') {
+                    db.style.display = 'flex';
+                    zc.style.display = 'none';
+                    esc.style.display = 'none';
+                    syn.style.display = 'none';
+                } else if (label === 'Service') { // Merged logic
+                    db.style.display = 'none';
+                    zc.style.display = 'flex'; // This shows the Zones content
+                    esc.style.display = 'none';
+                    syn.style.display = 'none';
+                    updateZonesTabMap();
+                } else if (label === 'Escape') {
+                    db.style.display = 'none';
+                    zc.style.display = 'none';
+                    esc.style.display = 'flex';
+                    syn.style.display = 'none';
+                    selectTransport(currentSelectedTransport);
+                } else if (label === 'Sync') {
+                    db.style.display = 'none';
+                    zc.style.display = 'none';
+                    esc.style.display = 'none';
+                    syn.style.display = 'flex';
+                    const myT = document.getElementById('sync-my-ticket');
+                    if (myT && !myT.value) {
+                        myT.value = safeStorageGet('ticketId') || 'IPL-2026-A12';
+                    }
+                } else {
+                    db.style.display = 'none';
+                    zc.style.display = 'none';
+                    esc.style.display = 'none';
+                    syn.style.display = 'none';
+                }
+            }
+        }
+
+        function findMeetingPoint() {
+            const myT = document.getElementById('sync-my-ticket').value.trim();
+            const frT = document.getElementById('sync-friend-ticket').value.trim();
+            const err = document.getElementById('sync-error');
+
+            err.innerText = '';
+            if (!frT) {
+                err.innerText = "Please enter your friend's ticket ID";
+                return;
+            }
+
+            const regex = /^IPL-2026-([A-Z])\d+$/i;
+            const matchMe = myT.match(regex);
+            const matchFr = frT.match(regex);
+
+            if (!matchFr) {
+                err.innerText = "Format should be: IPL-2026-D22";
+                return;
+            }
+
+            const mySec = matchMe ? matchMe[1].toUpperCase() : 'A';
+            const frSec = matchFr[1].toUpperCase();
+
+            const secDiff = Math.abs(mySec.charCodeAt(0) - frSec.charCodeAt(0));
+
+            let loc = '';
+            let walkYou = '';
+            let walkFr = '';
+
+            if (secDiff === 0) {
+                loc = "Your Nearest Food Court";
+                walkYou = "2 mins";
+                walkFr = "2 mins";
+            } else if (secDiff === 1) {
+                loc = "Concourse Central Area";
+                walkYou = "3 mins";
+                walkFr = "3 mins";
+            } else {
+                loc = "Gate C Main Entrance Area";
+                walkYou = "4 mins";
+                walkFr = "4 mins";
+            }
+
+            document.getElementById('sync-res-loc').innerText = loc;
+            document.getElementById('sync-walk-you').innerText = walkYou;
+            document.getElementById('sync-walk-friend').innerText = walkFr;
+
+            updateSyncRecommendation();
+            document.getElementById('sync-result-card').style.display = 'block';
+        }
+
+        function updateSyncRecommendation() {
+            const bannerCont = document.getElementById('sync-banner-cont');
+            if (!bannerCont) return;
+
+            const card = document.getElementById('sync-result-card');
+            if (card.style.display !== 'block') return;
+
+            if (lastRecommendationState === 'GREEN') {
+                bannerCont.innerHTML = `<div class="sync-banner green">Go now! Match is in low phase</div>`;
+            } else if (lastRecommendationState === 'YELLOW') {
+                bannerCont.innerHTML = `<div class="sync-banner yellow">Move fast, window closing</div>`;
+            } else {
+                bannerCont.innerHTML = `
+          <div class="sync-banner red">Wait for next LOW window</div>
+          <div class="sync-pulse">Next window in approx 8 mins</div>
+          <div class="sync-banner yellow" style="margin-top: 15px; text-align: left;">
+            ⚠️ Stay seated.<br><span style="font-weight: normal; font-size: 13px; color: white;">Coordinate during next break.</span>
+          </div>
+        `;
+            }
+        }
+
+        let currentSelectedTransport = 'Metro';
+
+        function selectTransport(vehicle) {
+            currentSelectedTransport = vehicle;
+            document.querySelectorAll('.esc-card').forEach(c => c.classList.remove('active'));
+            let el = document.getElementById('esc-card-' + vehicle);
+            if (el) el.classList.add('active');
+
+            const titleEl = document.getElementById('esc-rec-title');
+            const detailsEl = document.getElementById('esc-rec-details');
+            const dotL = document.getElementById('esc-dot-leave');
+            const labL = document.getElementById('esc-label-leave');
+
+            const liveState = currentVenueZonesData['Exit Gate'] || 'CLEAR';
+
+            if (vehicle === 'Metro') {
+                titleEl.innerText = 'Leave at Over 19.2';
+                titleEl.style.color = '#00ff88';
+                detailsEl.innerHTML = `
+          <li>✅ Metro platform will be empty</li>
+          <li>✅ Walk time to station: 8 mins</li>
+          <li>⚠️ If you leave at end: 35 min wait</li>
+          <li>Current crowd at exit: <span style="color: ${liveState === 'BUSY' ? '#ff3355' : liveState === 'MODERATE' ? '#ffcc00' : '#00ff88'}; font-weight: bold;">${liveState}</span></li>
+        `;
+                if (dotL) dotL.style.left = '85%';
+                if (labL) labL.style.left = '85%';
+            } else if (vehicle === 'Cab') {
+                titleEl.innerText = 'Leave at Over 19.4';
+                titleEl.style.color = '#00ff88';
+                detailsEl.innerHTML = `
+          <li>✅ Cabs available outside Gate A</li>
+          <li>✅ Current cab wait: 3 mins</li>
+          <li>⚠️ If you leave at end: 22 min wait</li>
+        `;
+                if (dotL) dotL.style.left = '90%';
+                if (labL) labL.style.left = '90%';
+            } else if (vehicle === 'Own Car') {
+                titleEl.innerText = 'Stay Till End';
+                titleEl.style.color = '#00ff88';
+                detailsEl.innerHTML = `
+          <li>✅ Parking Zone C clears in 20 mins</li>
+          <li>✅ Avoid exit before 10 mins post match</li>
+          <li>⚠️ Current parking crowd: MODERATE</li>
+        `;
+                if (dotL) dotL.style.left = '100%';
+                if (labL) labL.style.left = '100%';
+            }
+        }
+
+        let currentlySelectedZone = 'Food Court';
+
+        function selectZone(zoneKey) {
+            currentlySelectedZone = zoneKey;
+            const state = currentVenueZonesData[zoneKey] || 'CLEAR';
+            let waitTime = '0-2 mins';
+            let tip = 'Perfect time to go right now!';
+            let color = '#00ff88';
+
+            if (state === 'BUSY') {
+                waitTime = (Math.floor(Math.random() * 6) + 15) + ' mins';
+                tip = 'Come back during next LOW window';
+                color = '#ff3355';
+            } else if (state === 'MODERATE') {
+                waitTime = (Math.floor(Math.random() * 6) + 5) + ' mins';
+                tip = 'Manageable now, move quickly';
+                color = '#ffcc00';
+            }
+
+            document.getElementById('zs-d-name').innerText = zoneKey;
+            const bge = document.getElementById('zs-d-badge');
+            bge.innerText = state;
+            bge.style.background = color;
+            bge.style.color = (state === 'MODERATE' || state === 'CLEAR') ? 'black' : 'white';
+            document.getElementById('zs-d-wait').innerText = `Estimated wait: ${waitTime}`;
+            document.getElementById('zs-d-best').innerText = `Best time to visit: When match is LOW`;
+            document.getElementById('zs-d-walk').innerText = 'Your walk time: 2-4 mins from your gate';
+            document.getElementById('zs-d-tip').innerText = tip;
+            // Inside selectZone()
+            document.getElementById('zs-d-best').innerText = `Smart Recommendation: Go during the next LOW interval`;
+            document.getElementById('zs-d-tip').innerText = state === 'CLEAR' ? "⚡ No queue! Go now." : "⏳ High wait times reported.";
+        }
+
+        function updateZonesTabMap() {
+            const m = {
+                'Food Court': 'zs-map-food',
+                'Toilets': 'zs-map-toilets',
+                'Entry Gate': 'zs-map-entry',
+                'Exit Gate': 'zs-map-exit',
+                'Concourse': 'zs-map-concourse'
+            };
+            for (let key in m) {
+                const btn = document.getElementById(m[key]);
+                if (btn) {
+                    btn.className = 'zs-btn ' + (currentVenueZonesData[key] || 'CLEAR');
+                }
+            }
+            if (document.getElementById('zones-tab-content') && document.getElementById('zones-tab-content').style.display === 'flex') {
+                selectZone(currentlySelectedZone);
+            }
+        }
+
+        setInterval(function () {
+            const seatSection = sessionStorage.getItem('seatSection');
+            const badge = document.getElementById('fmSeatBadge');
+            if (seatSection) {
+                badge.textContent = seatSection;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
