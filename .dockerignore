@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+firebase-debug.log
+Dockerfile
+.dockerignore
+package.json
+package-lock.json
