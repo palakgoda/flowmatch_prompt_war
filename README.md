@@ -1,31 +1,41 @@
 *🏟️ FlowMatch Pro | Aegis AI*
 
-FlowMatch Pro is a smart stadium assistant that helps fans stay safe and skip the crowds. It uses AI to tell you exactly when to move, which gate to use, and even when to grab a snack.
+FlowMatch Pro is a state-aware AI assistant designed to eliminate stadium bottlenecks. It doesn't just show data; it manages the "Action Window" to keep fans moving safely and efficiently.
 
-*✨ What it does*:
+*✨ What it does:*
 
-🎟️ Smart Sync: Enter a ticket ID (like IPL-AMD-G05) and the app automatically pulls up the right stadium map and event info.
+🎟️ Smart Sync: Enter a ticket ID (e.g., IPL-AMD-G05) and the Aegis Engine instantly reconfigures the UI for that specific venue and event type.
 
-🏏 Multi-Event Support: It works for IPL (Cricket), F1 Racing, and Concerts. The whole theme changes to match the vibe!
+🏎️ Multi-Event Mesh: Supports IPL, F1, and Concerts. The app "shape-shifts" its theme, icons, and safety logic to match the specific crowd dynamics of the event.
 
-🏃‍♂️ Smart Escape: Shows you a "Safe Corridor" on a map to help you exit the stadium without getting stuck in a bottleneck.
+🏃‍♂️ Smart Escape: Generates a "Safe Corridor" using live density scanning to guide you to the optimal exit gate.
 
-🍔 Skip the Line: Tells you which food counter is empty and gives you a "Smart Token" so you don't have to wait in a queue.
+🍔 Skip the Line: AI detects low-action phases (like timeouts) to issue Smart Tokens, allowing you to skip food queues.
 
-👁️ Eye-Care Design: Uses a special "Titanium Slate" dark theme so it’s comfortable to look at, even at night or in a bright stadium.
+👁️ Eye-Care Design: A custom "Titanium Slate" theme designed for high-ambient stadium environments to prevent eye strain.
 
-*🛠️ How it was built:*
+🛡️ Security & Privacy (The "Why")
+We use Session-Only Geolocation for two reasons:
 
-HTML5 & CSS3: For the sleek "Glass" look and animations.
+Venue Verification: To ensure the AI activates only when you are physically at the stadium, preventing system spoofing.
 
-JavaScript: To handle all the logic and "National Mesh" switching.
+Precision Logistics: To calculate real-time walking distances to your specific exit gate and transport hub.
+Your data is never stored; it stays in your session only.
 
-Leaflet.js: To show the high-quality satellite maps of the stadiums.
+*🛠️ The Prompt War Architecture:*
+
+This project was built by "steering" AI through complex constraints:
+
+Context Injection: Using a VENUE_REGISTRY to teach the AI about national infrastructure.
+
+Visual Programming: Using negative constraints to "De-box" the UI and create a fluid, glassmorphism-based agent interface.
+
+Logical States: Mapping natural language triggers (Ticket IDs) to deep CSS and JS state changes.
 
 *🚀 How to use it:*
 
 Open index.html in your browser.
 
-Type in a sample ticket like F1-BIC-P02 (for Formula 1) or IPL-AMD-G05 (for Cricket).
+Enter a "Magic Key" like F1-BIC-P02 (Noida Racing) or IPL-WANKH-B03 (Mumbai Cricket).
 
-Watch the app transform and start giving you live AI advice!
+Watch the National Mesh activate.
