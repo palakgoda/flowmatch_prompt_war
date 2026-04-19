@@ -6,165 +6,249 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FlowMatch Pro | Aegis Intelligence</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
-
   <style>
     :root {
-      --bg-color: #020308;
-      --neon-green: #00ff88;
-      --warning-red: #ff3355;
-      --yellow: #ffcc00;
-      --glass-bg: rgba(12, 16, 28, 0.96);
+      --bg: #020308;
+      --accent: #00ff88;
+      --accent-rgb: 0, 255, 136;
+      --accent-dim: rgba(0, 255, 136, 0.12);
+      --accent-glow: rgba(0, 255, 136, 0.3);
+      --muted: #6a758d;
+      --text: rgba(255, 255, 255, 0.92);
+      --text-dim: rgba(255, 255, 255, 0.5);
+      --glass: linear-gradient(160deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.01) 100%);
       --glass-border: rgba(255, 255, 255, 0.1);
-      --text-muted: #8a95ad;
+      --panel-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      --danger: #ff3355;
+      --yellow: #ffcc00;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    ::-webkit-scrollbar {
+      display: none
+    }
+
+    * {
+      scrollbar-width: none
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg-color);
-      color: white;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Outfit', sans-serif;
       height: 100vh;
       overflow: hidden;
-      background-image:
-        radial-gradient(circle at 50% 50%, #0a1020 0%, #020308 100%),
-        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 50px 50px, 50px 50px;
-      animation: gridMove 120s linear infinite;
+      background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(var(--accent-rgb), 0.07) 0%, transparent 65%),
+        radial-gradient(circle at 50% 50%, #06080f 0%, #020308 100%);
+      transition: background-image 0.8s ease;
     }
 
-    @keyframes gridMove {
+    /* ── TOP BAR ── */
+    #topBar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 50px;
+      background: rgba(4, 6, 12, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1000;
+      backdrop-filter: blur(30px) saturate(180%);
+    }
+
+    #topBar.visible {
+      display: flex;
+      animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideDown {
       from {
-        background-position: 0 0, 0 0, 0 0;
+        opacity: 0;
+        transform: translateY(-12px)
       }
 
       to {
-        background-position: 0 0, 500px 500px, 500px 500px;
+        opacity: 1;
+        transform: translateY(0)
       }
     }
 
-    .particles-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .particle {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.2;
-    }
-
-    /* HEADER */
-    .fm-top-bar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      height: 60px;
-      background: rgba(10, 12, 18, 0.95);
-      border-bottom: 1px solid var(--glass-border);
+    .tb-brand {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0 25px;
-      z-index: 1000;
-      box-sizing: border-box;
-      backdrop-filter: blur(15px);
+      gap: 8px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      font-size: 12px;
     }
 
-    /* LOGIN */
+    .tb-brand .material-icons {
+      font-size: 17px;
+      color: var(--accent);
+      filter: drop-shadow(0 0 6px var(--accent));
+      transition: color 0.5s, filter 0.5s;
+    }
+
+    .tb-center {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.06);
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      padding: 5px 16px;
+      border-radius: 30px;
+      letter-spacing: 2px;
+      transition: all 0.5s;
+    }
+
+    .tb-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tb-saved {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      opacity: 0.8;
+      transition: color 0.5s;
+    }
+
+    .tb-saved-num {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .tb-disconnect {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 51, 85, 0.08);
+      border: 1px solid rgba(255, 51, 85, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      color: var(--danger);
+    }
+
+    .tb-disconnect:hover {
+      background: rgba(255, 51, 85, 0.2);
+      transform: scale(1.1);
+    }
+
+    .tb-disconnect .material-icons {
+      font-size: 14px;
+    }
+
+    .tb-event-badge {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(var(--accent-rgb), 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      transition: all 0.5s;
+      font-weight: 700;
+    }
+
+    /* ── LOGIN ── */
     #login-screen {
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      position: relative;
+      padding: 20px;
       z-index: 100;
-      padding: 80px 20px 20px 20px;
-      box-sizing: border-box;
+      position: relative;
     }
 
     .login-card {
-      width: min(90%, 420px);
-      max-height: calc(100vh - 100px);
-      background: #0f121c;
-      border: 1px solid rgba(0, 255, 136, 0.4);
-      box-shadow: 0 0 80px rgba(0, 255, 136, 0.2);
+      width: min(90vw, 420px);
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      box-shadow: 0 0 80px rgba(var(--accent-rgb), 0.1), var(--panel-shadow);
       border-radius: 32px;
-      padding: 24px 24px 20px 24px;
+      padding: clamp(24px, 3vh, 36px) clamp(24px, 3vw, 36px);
       text-align: center;
-      position: relative;
-      transition: 0.3s ease;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      backdrop-filter: blur(40px);
     }
 
     .ticket-emoji {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 0 15px rgba(255, 51, 136, 0.5));
+      font-size: 2.4rem;
+      margin-bottom: 12px;
     }
 
     .login-card h1 {
-      font-size: 1.7rem;
+      font-size: clamp(1.3rem, 3vw, 1.75rem);
       font-weight: 800;
-      margin: 6px 0 4px 0;
-      letter-spacing: -0.5px;
+      margin-bottom: 6px;
     }
 
     .login-card>p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      opacity: 0.8;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 20px;
     }
 
     .auth-tabs {
       display: flex;
-      background: #161a25;
+      background: rgba(255, 255, 255, 0.04);
       border-radius: 14px;
-      padding: 5px;
-      margin-bottom: 14px;
-      gap: 5px;
+      padding: 4px;
+      margin-bottom: 16px;
+      gap: 4px;
     }
 
     .auth-tab {
       flex: 1;
-      padding: 11px 10px;
-      font-size: 14px;
+      padding: 10px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       border-radius: 10px;
-      color: var(--text-muted);
+      color: var(--muted);
       transition: 0.3s;
     }
 
     .auth-tab.active {
-      background: #232938;
+      background: rgba(255, 255, 255, 0.08);
       color: white;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     }
 
     .ticket-input-wrap {
-      background: #080a10;
-      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
       padding: 13px 16px;
-      margin-bottom: 12px;
-      border: 1px solid #2a2a2a;
+      margin-bottom: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       transition: 0.3s;
+    }
+
+    .ticket-input-wrap:focus-within {
+      box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3), 0 0 20px rgba(var(--accent-rgb), 0.08);
     }
 
     .ticket-input-wrap input {
@@ -176,21 +260,46 @@
       font-size: 1rem;
       font-family: 'JetBrains Mono';
       outline: none;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
     }
 
     ::placeholder {
       color: rgba(255, 255, 255, 0.2);
-      font-size: 1rem;
     }
 
-    /* ── QR SCANNER ── */
+    .ticket-hints {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hint-pill {
+      font-family: 'JetBrains Mono';
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .hint-pill:hover {
+      background: rgba(var(--accent-rgb), 0.08);
+      border-color: rgba(var(--accent-rgb), 0.3);
+      color: var(--accent);
+    }
+
     #qrWrap {
       display: none;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     #qrWrap.visible {
@@ -199,14 +308,13 @@
 
     .scanner-frame {
       position: relative;
-      width: 100%;
-      max-width: 260px;
+      width: min(200px, 50vw);
       border-radius: 18px;
       overflow: hidden;
-      border: 2px solid rgba(0, 255, 136, 0.5);
-      box-shadow: 0 0 24px rgba(0, 255, 136, 0.2);
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.2);
       background: #000;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 1;
     }
 
     #qrVideo {
@@ -221,88 +329,67 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
       animation: scanMove 2s linear infinite;
-      box-shadow: 0 0 10px var(--neon-green);
     }
 
     @keyframes scanMove {
       0% {
-        top: 0%;
+        top: 0%
       }
 
       50% {
-        top: 95%;
+        top: 95%
       }
 
       100% {
-        top: 0%;
+        top: 0%
       }
     }
 
-    /* corner brackets */
-    .scanner-frame::before,
-    .scanner-frame::after {
-      content: '';
-      position: absolute;
-      width: 28px;
-      height: 28px;
-      border-color: var(--neon-green);
-      border-style: solid;
-      z-index: 2;
-    }
-
-    .scanner-frame::before {
-      top: 10px;
-      left: 10px;
-      border-width: 3px 0 0 3px;
-      border-radius: 4px 0 0 0;
-    }
-
-    .scanner-frame::after {
-      bottom: 10px;
-      right: 10px;
-      border-width: 0 3px 3px 0;
-      border-radius: 0 0 4px 0;
-    }
-
     #qrStatus {
-      font-size: 13px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: var(--muted);
       font-family: 'JetBrains Mono';
-      letter-spacing: 1px;
     }
 
     #qrStatus.success {
-      color: var(--neon-green);
+      color: var(--accent);
     }
 
     #qrStatus.error {
-      color: var(--warning-red);
+      color: var(--danger);
     }
 
     #qrCanvas {
       display: none;
     }
 
-    .privacy-note {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
+    .location-note {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
       margin-bottom: 14px;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 10px;
       text-align: left;
       line-height: 1.5;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .btn-green {
-      background: var(--neon-green);
+    .location-note .material-icons {
+      color: var(--accent);
+      font-size: 17px;
+      flex-shrink: 0;
+      transition: color 0.5s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
       color: black;
       font-weight: 800;
       width: 100%;
@@ -310,32 +397,32 @@
       border-radius: 60px;
       border: none;
       cursor: pointer;
-      font-size: 1rem;
-      transition: 0.3s;
+      font-size: 0.88rem;
+      transition: all 0.3s;
       text-transform: uppercase;
       letter-spacing: 2px;
+      font-family: 'Outfit';
     }
 
-    .btn-green:hover {
-      transform: scale(1.03);
-      filter: brightness(1.1);
-      box-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 40px rgba(var(--accent-rgb), 0.4);
     }
 
-    .btn-green:disabled {
-      background: #333;
-      color: #666;
+    .btn-primary:disabled {
+      background: #1e2030;
+      color: #444;
       cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
     }
 
-    /* DASHBOARD */
+    /* ── DASHBOARD ── */
     #dashboard-screen {
       display: none;
-      grid-template-columns: 340px 1fr 340px;
-      gap: 25px;
-      padding: 90px 30px 100px 30px;
       height: 100vh;
-      box-sizing: border-box;
+      padding: 62px 16px 66px;
+      gap: 14px;
       position: relative;
       z-index: 10;
     }
@@ -344,144 +431,1874 @@
       display: grid;
     }
 
+    #dashboard-screen.layout-home {
+      grid-template-columns: clamp(200px, 20vw, 280px) 1fr clamp(200px, 20vw, 280px);
+    }
+
+    #dashboard-screen.layout-service {
+      grid-template-columns: 1fr clamp(220px, 22vw, 295px);
+      padding-top: 62px;
+    }
+
+    #dashboard-screen.layout-escape {
+      grid-template-columns: clamp(200px, 20vw, 280px) 1fr clamp(200px, 20vw, 280px);
+    }
+
+    /* ── PANEL BASE ── */
     .panel {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 40px;
-      padding: 30px;
-      backdrop-filter: blur(40px);
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: clamp(16px, 2vw, 26px);
+      padding: clamp(14px, 2vh, 22px) clamp(14px, 1.6vw, 20px);
+      backdrop-filter: blur(28px) saturate(160%);
+      box-shadow: var(--panel-shadow);
       position: relative;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
     }
 
-    .panel h2 {
-      font-size: 12px;
-      margin: 0 0 25px 0;
-      color: var(--text-muted);
+    .panel-label {
+      font-size: 10px;
       letter-spacing: 5px;
       text-transform: uppercase;
+      color: var(--muted);
       display: flex;
       align-items: center;
+      gap: 8px;
+      margin-bottom: clamp(10px, 1.4vh, 16px);
+      flex-shrink: 0;
+    }
+
+    .panel-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    /* ── HOME LEFT ── */
+    #col-left {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .telemetry-panel {
+      flex-shrink: 0;
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 18px 20px;
+      backdrop-filter: blur(28px);
+      box-shadow: var(--panel-shadow), 0 0 50px rgba(var(--accent-rgb), 0.07);
+      transition: box-shadow 0.8s;
+    }
+
+    #intensityTitle {
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1;
+      transition: all 0.5s ease;
+    }
+
+    #intensityDesc {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 5px;
+      transition: all 0.4s;
+    }
+
+    .intel-feed-wrap {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 18px 20px;
+      backdrop-filter: blur(28px);
+      box-shadow: var(--panel-shadow);
+    }
+
+    .intel-stream {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .intel-stream::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, var(--accent) 30%, var(--accent) 70%, transparent);
+      box-shadow: 0 0 10px var(--accent);
+      opacity: 0.5;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    .log-entry {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      padding: 6px 0 6px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      animation: fadeInLog 0.35s ease;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    @keyframes fadeInLog {
+      from {
+        opacity: 0;
+        transform: translateX(-5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .log-ts {
+      color: var(--accent);
+      font-size: 9px;
+      opacity: 0.55;
+      flex-shrink: 0;
+      transition: color 0.5s;
+    }
+
+    .log-icon {
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .log-text {
+      font-size: 11px;
+    }
+
+    .log-security {
+      color: #a0b4cc;
+    }
+
+    .log-match {
+      color: #ffdd88;
+    }
+
+    .log-crowd {
+      color: #88ffcc;
+    }
+
+    /* ── HOME CENTER ── */
+    #col-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0;
+    }
+
+    .decision-core-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .window-ring-wrap {
+      position: relative;
+      width: clamp(190px, 22vw, 300px);
+      height: clamp(190px, 22vw, 300px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .window-ring-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      pointer-events: none;
+    }
+
+    .wr-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 3;
+    }
+
+    .wr-arc {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 8px var(--accent));
+      transition: stroke-dashoffset 1s linear, stroke 0.5s, filter 0.5s;
+    }
+
+    .wr-arc-outer {
+      fill: none;
+      stroke: rgba(var(--accent-rgb), 0.12);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke 0.5s;
+    }
+
+    .window-ring-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 1;
+      padding: 20px;
+    }
+
+    #personaIcon {
+      font-size: clamp(48px, 6.5vw, 76px);
+      line-height: 1;
+      filter: drop-shadow(0 0 24px var(--accent));
+      animation: iconFloat 4s ease-in-out infinite;
+      margin-bottom: 10px;
+      transition: filter 0.5s;
+    }
+
+    @keyframes iconFloat {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-7px)
+      }
+    }
+
+    .dc-label {
+      font-size: 9px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dc-live-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: livePulse 1.5s ease infinite;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    @keyframes livePulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.2)
+      }
+    }
+
+    #recTitle {
+      font-size: clamp(2.8rem, 6.5vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -4px;
+      line-height: 0.9;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: breathe 3.5s ease-in-out infinite;
+      color: var(--accent);
+    }
+
+    @keyframes breathe {
+
+      0%,
+      100% {
+        text-shadow: 0 0 40px var(--accent), 0 0 80px rgba(var(--accent-rgb), 0.15);
+      }
+
+      50% {
+        text-shadow: 0 0 70px var(--accent), 0 0 140px rgba(var(--accent-rgb), 0.3), 0 0 220px rgba(var(--accent-rgb), 0.08);
+      }
+    }
+
+    #windowTimer {
+      margin-top: 14px;
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0.7;
+      letter-spacing: 2px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.5s;
+    }
+
+    .wt-bar {
+      width: 55px;
+      height: 2px;
+      border-radius: 2px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .wt-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      transition: width 1s linear, background 0.5s, box-shadow 0.5s;
+    }
+
+    #recReason {
+      max-width: 360px;
+      text-align: center;
+      margin: 10px auto 0;
+      line-height: 1.7;
+      font-size: clamp(0.85rem, 1.4vw, 1rem);
+      color: var(--text-dim);
+      transition: all 0.5s ease;
+    }
+
+    /* ── HOME RIGHT ── */
+    #col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .sensor-pill {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 9px 13px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+      font-size: 12px;
+      transition: all 0.35s;
+    }
+
+    .sensor-pill:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      box-shadow: 0 0 7px currentColor;
+    }
+
+    .smart-escape-strip {
+      background: rgba(var(--accent-rgb), 0.05);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.14);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: auto;
+      transition: all 0.5s;
+    }
+
+    .smart-escape-strip .material-icons {
+      color: var(--accent);
+      font-size: 18px;
+      transition: color 0.5s;
+    }
+
+    .se-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      transition: color 0.5s;
+    }
+
+    .se-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── SERVICE TAB ── */
+    #service-hub {
+      display: none;
+      overflow: hidden;
+    }
+
+    #service-hub.active {
+      display: flex;
+    }
+
+    #concierge-hub {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #hub-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    #hub-center {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .alerts-panel {
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: 16px 18px;
+      backdrop-filter: blur(28px);
+      flex: 1;
+      overflow: hidden;
+      box-shadow: var(--panel-shadow);
+    }
+
+    .alert-item {
+      padding: 9px 11px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.025);
+      margin-bottom: 6px;
+      border-left: 2px solid var(--accent);
+      font-size: 12px;
+      line-height: 1.5;
+      animation: alertPop 0.3s ease;
+      transition: border-color 0.5s;
+    }
+
+    @keyframes alertPop {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .alert-tag {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 20px;
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+
+    .tag-order {
+      background: rgba(var(--accent-rgb), 0.1);
+      color: var(--accent);
+      transition: all 0.5s;
+    }
+
+    .tag-friend {
+      background: rgba(var(--accent-rgb), 0.08);
+      color: var(--accent);
+      transition: all 0.5s;
+    }
+
+    .tag-system {
+      background: rgba(255, 204, 0, 0.08);
+      color: var(--yellow);
+    }
+
+    .svc-flow-card {
+      background: var(--glass);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.2);
+      border-radius: 22px;
+      padding: 18px 20px;
+      backdrop-filter: blur(28px);
+      box-shadow: var(--panel-shadow), 0 0 50px rgba(var(--accent-rgb), 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+
+    .tier-instruction-title {
+      font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--accent);
+      text-shadow: 0 0 30px rgba(var(--accent-rgb), 0.5);
+      line-height: 1.1;
+      transition: all 0.5s;
+    }
+
+    .tier-reason {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.6;
+    }
+
+    .tier-proof {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--accent);
+      padding: 6px 12px;
+      background: rgba(var(--accent-rgb), 0.05);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.85;
+      transition: all 0.5s;
+    }
+
+    .tier-warning {
+      font-size: 11px;
+      color: var(--yellow);
+      background: rgba(255, 204, 0, 0.05);
+      border-left: 2px solid rgba(255, 204, 0, 0.35);
+      border-radius: 8px;
+      padding: 8px 11px;
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .pipeline-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pipeline-item {
+      flex: 1;
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pipeline-item-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .pipeline-item-val {
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .concession-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .concession-grid-label {
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .concession-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .sel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 4px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .sel-item:hover {
+      background: rgba(var(--accent-rgb), 0.07);
+      transform: translateY(-2px);
+    }
+
+    .sel-item.selected {
+      background: rgba(var(--accent-rgb), 0.12);
+      box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.18);
+    }
+
+    .sel-emoji {
+      font-size: clamp(1.3rem, 2vw, 1.7rem);
+    }
+
+    .sel-name {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .sel-btn {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(var(--accent-rgb), 0.3);
+      color: var(--accent);
+      cursor: pointer;
+      background: transparent;
+      transition: 0.2s;
+      font-family: 'Outfit';
+      font-weight: 700;
+    }
+
+    .sel-btn:hover,
+    .sel-item.selected .sel-btn {
+      background: var(--accent);
+      color: #000;
+    }
+
+    #execution-state {
+      display: none;
+      flex-direction: column;
       gap: 12px;
     }
 
-    .panel h2::before {
-      content: "●";
-      color: var(--neon-green);
-      font-size: 10px;
+    #execution-state.visible {
+      display: flex;
+      animation: execReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    @keyframes execReveal {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .order-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(var(--accent-rgb), 0.08);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.28);
+    }
+
+    .order-banner.visible {
+      display: flex;
+      animation: bannerPulse 2s ease infinite;
+    }
+
+    @keyframes bannerPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.1)
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(var(--accent-rgb), 0.3)
+      }
+    }
+
+    .oab-text {
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--accent);
+      transition: color 0.5s;
+    }
+
+    .exec-hero {
+      background: rgba(var(--accent-rgb), 0.07);
+      border-radius: 22px;
+      padding: 22px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.28);
+      animation: heroGlow 2.5s ease-in-out infinite;
+      transition: background 0.5s, border-color 0.5s;
+    }
+
+    @keyframes heroGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.1)
+      }
+
+      50% {
+        box-shadow: 0 0 70px rgba(var(--accent-rgb), 0.28)
+      }
+    }
+
+    .exec-tag {
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: color 0.5s;
+    }
+
+    .exec-command {
+      font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.8);
+      line-height: 1.05;
+      margin-bottom: 16px;
+      transition: all 0.5s;
+    }
+
+    .exec-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
+      margin: 12px 0;
+      transition: background 0.5s;
+    }
+
+    .exec-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      margin-bottom: 7px;
+    }
+
+    .exec-icon {
+      color: var(--accent);
+      font-size: 18px;
+      transition: color 0.5s;
+    }
+
+    .exec-label {
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1px;
+    }
+
+    .exec-val {
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .exec-cancel {
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: 'Outfit';
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: none;
+    }
+
+    .exec-cancel:hover {
+      background: rgba(255, 51, 85, 0.1);
+      color: var(--danger);
+    }
+
+    #service-right {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #service-right.active {
+      display: flex;
+    }
+
+    .token-card {
+      background: rgba(var(--accent-rgb), 0.07);
+      border-radius: 24px;
+      padding: 20px 22px;
+      text-align: center;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.22);
+      box-shadow: var(--panel-shadow), 0 0 50px rgba(var(--accent-rgb), 0.1);
+      flex-shrink: 0;
+      transition: all 0.5s;
+    }
+
+    .token-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+      transition: color 0.5s;
+    }
+
+    .token-number {
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -3px;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.7);
+      line-height: 1;
+      font-family: 'JetBrains Mono';
+      margin: 8px 0;
+      transition: all 0.5s;
+    }
+
+    .token-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .token-idle-msg {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+      padding: 12px;
+    }
+
+    .countdown-wrap {
+      position: relative;
+      width: clamp(76px, 8.5vw, 94px);
+      height: clamp(76px, 8.5vw, 94px);
+      margin: 10px auto;
+    }
+
+    .countdown-ring {
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: rgba(var(--accent-rgb), 0.1);
+      stroke-width: 6;
+      transition: stroke 0.5s;
+    }
+
+    .ring-arc {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.5s;
+      filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.8));
+    }
+
+    .countdown-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cdTimer {
+      font-size: 1.25rem;
+      font-weight: 900;
+      font-family: 'JetBrains Mono';
+      color: var(--accent);
+      letter-spacing: -1px;
+      transition: color 0.5s;
+    }
+
+    #cdLabel {
+      font-size: 8px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .zone-info-card {
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 16px 18px;
+      backdrop-filter: blur(28px);
+      box-shadow: var(--panel-shadow);
+      flex-shrink: 0;
+    }
+
+    .vi-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .vi-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .vi-icon {
+      color: var(--accent);
+      font-size: 17px;
+      transition: color 0.5s;
+    }
+
+    .vi-label {
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .vi-val {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* ── ESCAPE TAB ── */
+    #escape-left {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #escape-center {
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #escape-right {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .exit-status-panel {
+      background: rgba(var(--accent-rgb), 0.05);
+      border-radius: 24px;
+      padding: 18px 20px;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.18);
+      box-shadow: var(--panel-shadow), 0 0 40px rgba(var(--accent-rgb), 0.07);
+      flex-shrink: 0;
+      transition: all 0.5s;
+    }
+
+    .exit-meter-wrap {
+      position: relative;
+      width: clamp(100px, 11vw, 132px);
+      height: clamp(100px, 11vw, 132px);
+      margin: 0 auto 10px;
+    }
+
+    .exit-ring-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(135deg);
+    }
+
+    .exit-ring-bg {
+      fill: none;
+      stroke: rgba(var(--accent-rgb), 0.1);
+      stroke-width: 7;
+      stroke-linecap: round;
+    }
+
+    .exit-ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 7;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 7px rgba(var(--accent-rgb), 0.7));
+      transition: stroke-dasharray 1.5s ease, stroke 0.5s, filter 0.5s;
+    }
+
+    .exit-meter-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .exit-dist-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+
+    .exit-dist-num {
+      font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+      font-weight: 900;
+      font-family: 'JetBrains Mono';
+      color: var(--accent);
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.5);
+      transition: all 0.5s;
+    }
+
+    .exit-dist-unit {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(var(--accent-rgb), 0.65);
+      transition: all 0.5s;
+    }
+
+    .exit-walk {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .exit-dest-pill {
+      background: rgba(var(--accent-rgb), 0.08);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.22);
+      border-radius: 30px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      display: inline-block;
+      transition: all 0.5s;
+    }
+
+    .exit-alerts-panel {
+      background: var(--glass);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 14px 16px;
+      backdrop-filter: blur(28px);
+      flex: 1;
+      overflow: hidden;
+      box-shadow: var(--panel-shadow);
+    }
+
+    .exit-alert-item {
+      padding: 7px 9px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 5px;
+      border-left: 2px solid var(--accent);
+      font-size: 11px;
+      line-height: 1.5;
+      animation: alertPop 0.3s ease;
+      font-family: 'JetBrains Mono';
+      transition: border-color 0.5s;
+    }
+
+    .exit-alert-item .ea-time {
+      color: var(--accent);
+      opacity: 0.65;
+      margin-right: 5px;
+      transition: color 0.5s;
+    }
+
+    .ea-critical {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .ea-clear {
+      color: var(--accent);
+      font-weight: 700;
+      transition: color 0.5s;
+    }
+
+    .ea-moderate {
+      color: var(--yellow);
+      font-weight: 700;
+    }
+
+    .escape-center-panel {
+      background: var(--glass);
+      border-radius: 26px;
+      padding: 16px 18px;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.15);
+      box-shadow: var(--panel-shadow), 0 0 60px rgba(var(--accent-rgb), 0.07);
+      backdrop-filter: blur(28px);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+
+    .escape-map-wrap {
+      flex: 1;
+      min-height: clamp(150px, 26vh, 300px);
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.15), 0 0 30px rgba(var(--accent-rgb), 0.1), inset 0 0 60px rgba(2, 3, 8, 0.6);
+      transition: box-shadow 0.5s;
+    }
+
+    #escapeMapEl {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .map-overlay-badge {
+      position: absolute;
+      bottom: 9px;
+      left: 9px;
+      z-index: 999;
+      background: rgba(2, 3, 8, 0.82);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.28);
+      border-radius: 8px;
+      padding: 4px 11px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(10px);
+      transition: all 0.5s;
+    }
+
+    .escape-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: escapePulse 1.4s ease infinite;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    @keyframes escapePulse {
+
+      0%,
+      100% {
+        opacity: 0.5
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    /* AI Strategy Bar */
+    .ai-strategy-bar {
+      display: flex;
+      gap: 0;
+      flex-shrink: 0;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.025);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .asb-item {
+      flex: 1;
+      padding: 11px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .asb-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .asb-item.danger {
+      background: rgba(255, 51, 85, 0.06);
+    }
+
+    .asb-item.safe {
+      background: rgba(var(--accent-rgb), 0.05);
+      transition: background 0.5s;
+    }
+
+    .asb-label {
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .asb-icon {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .asb-val {
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .asb-val.text-danger {
+      color: var(--danger);
+    }
+
+    .asb-val.text-safe {
+      color: var(--accent);
+      transition: color 0.5s;
+    }
+
+    .asb-sub {
+      font-family: 'JetBrains Mono';
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .warning-strip {
+      background: rgba(255, 51, 85, 0.06);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 11px;
+      color: var(--danger);
+      line-height: 1.6;
+      flex-shrink: 0;
+      margin-top: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .btn-escape-nav {
+      background: var(--accent);
+      color: #000;
+      font-weight: 900;
+      width: 100%;
+      padding: 13px;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-family: 'Outfit';
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-top: 10px;
+      animation: navBtnPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes navBtnPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.35)
+      }
+
+      50% {
+        box-shadow: 0 0 50px rgba(var(--accent-rgb), 0.7), 0 0 100px rgba(var(--accent-rgb), 0.25)
+      }
+    }
+
+    .btn-escape-nav:hover {
+      transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+
+    .btn-escape-nav.stop-mode {
+      background: rgba(255, 51, 85, 0.1);
+      color: var(--danger);
+      animation: none;
+      border-top: 1px solid rgba(255, 51, 85, 0.28);
+    }
+
+    .btn-escape-nav.stop-mode:hover {
+      background: rgba(255, 51, 85, 0.2);
+    }
+
+    #escapeNavHero {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #escapeNavHero.visible {
+      display: flex;
+      animation: execReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .nav-active-hero {
+      background: rgba(var(--accent-rgb), 0.08);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.35);
+      border-radius: 20px;
+      padding: 16px 18px;
+      text-align: center;
+      animation: escapeHeroGlow 2.5s ease-in-out infinite;
+      transition: all 0.5s;
+    }
+
+    @keyframes escapeHeroGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.12)
+      }
+
+      50% {
+        box-shadow: 0 0 70px rgba(var(--accent-rgb), 0.3)
+      }
+    }
+
+    .nav-active-tag {
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: color 0.5s;
+    }
+
+    .nav-active-cmd {
+      font-size: clamp(1.1rem, 2.8vw, 2rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.8);
+      line-height: 1.05;
+      margin-bottom: 12px;
+      transition: all 0.5s;
+    }
+
+    .nav-step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .nav-step-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 9px;
+      border-radius: 9px;
+      font-size: 11px;
+    }
+
+    .nav-step-row.current {
+      background: rgba(var(--accent-rgb), 0.08);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.18);
+      transition: all 0.5s;
+    }
+
+    .nav-step-row.next-step {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .nav-step-text {
+      flex: 1;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .nav-step-dist {
+      font-family: 'JetBrains Mono';
+      font-size: 11px;
+      color: var(--accent);
+      transition: color 0.5s;
+    }
+
+    /* Transport Hub */
+    .transport-hub-panel {
+      background: var(--glass);
+      border-radius: 24px;
+      padding: 16px 18px;
+      border-top: 1px solid rgba(var(--accent-rgb), 0.18);
+      box-shadow: var(--panel-shadow), 0 0 50px rgba(var(--accent-rgb), 0.06);
+      backdrop-filter: blur(28px);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+
+    .transport-hub-sub {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 2px;
+      margin-bottom: 14px;
+    }
+
+    .transport-item {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .transport-item:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .transport-item-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 7px;
+    }
+
+    .transport-item-icon {
+      font-size: 17px;
+    }
+
+    .transport-item-name {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .transport-eta {
+      margin-left: auto;
+      font-size: 11px;
+      font-family: 'JetBrains Mono';
+      color: var(--accent);
+      font-weight: 700;
+      transition: color 0.5s;
+    }
+
+    .transport-bar-wrap {
+      height: 2px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .transport-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1.5s ease;
+    }
+
+    .load-clear {
+      background: linear-gradient(90deg, var(--accent), #00d4ff);
+      box-shadow: 0 0 7px rgba(var(--accent-rgb), 0.5);
+      transition: background 0.5s;
+    }
+
+    .load-moderate {
+      background: linear-gradient(90deg, var(--yellow), #ff8800);
+    }
+
+    .load-busy {
+      background: linear-gradient(90deg, var(--danger), #ff6688);
+    }
+
+    .transport-meta {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .transport-status-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-left: 3px;
+    }
+
+    .pill-clear {
+      background: rgba(var(--accent-rgb), 0.1);
+      color: var(--accent);
+      transition: all 0.5s;
+    }
+
+    .pill-moderate {
+      background: rgba(255, 204, 0, 0.1);
+      color: var(--yellow);
+    }
+
+    .pill-busy {
+      background: rgba(255, 51, 85, 0.1);
+      color: var(--danger);
+    }
+
+    .safety-badge {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(var(--accent-rgb), 0.05);
+      border-top: 1px solid rgba(var(--accent-rgb), 0.13);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: auto;
+      flex-shrink: 0;
+      transition: all 0.5s;
+    }
+
+    .safety-check {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(var(--accent-rgb), 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.5s;
+    }
+
+    .safety-check .material-icons {
+      color: var(--accent);
+      font-size: 16px;
+      transition: color 0.5s;
+    }
+
+    .safety-badge-text {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 1px;
+      transition: color 0.5s;
+    }
+
+    .safety-badge-sub {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── BOTTOM NAV ── */
     .fm-bottom-bar {
       position: fixed;
       bottom: 0;
       width: 100%;
-      height: 85px;
-      background: rgba(10, 12, 18, 0.98);
-      border-top: 1px solid var(--glass-border);
+      height: clamp(56px, 7vh, 68px);
+      background: rgba(4, 6, 12, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
       display: none;
       justify-content: space-around;
       align-items: center;
       z-index: 1000;
+      backdrop-filter: blur(24px);
     }
 
+    .nav-item {
+      opacity: 0.3;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-item.active {
+      opacity: 1;
+    }
+
+    .nav-item.active-home {
+      color: var(--accent);
+    }
+
+    .nav-item.active-service {
+      color: var(--accent);
+    }
+
+    .nav-item.active-escape {
+      color: var(--accent);
+    }
+
+    .nav-item .material-icons {
+      font-size: clamp(18px, 2.2vw, 21px);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: livePulse 1.4s ease infinite;
+      flex-shrink: 0;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    /* ── VENUE CONTEXT FLASH ── */
+    #venueFlash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(ellipse at center, rgba(var(--accent-rgb), 0.15) 0%, transparent 70%);
+      transition: opacity 0.3s ease;
+    }
+
+    #venueFlash.flash {
+      animation: accentFlash 1.2s ease forwards;
+    }
+
+    @keyframes accentFlash {
+      0% {
+        opacity: 0
+      }
+
+      30% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0
+      }
+    }
+
+    /* ── TRANSITIONS ── */
+    .accent-transition * {
+      transition: background 0.6s ease, border-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease, filter 0.6s ease !important;
+    }
+
+    /* ── ERROR MODAL ── */
     #errorModal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #1a1e2a;
-      border: 2px solid var(--warning-red);
-      border-radius: 36px;
-      padding: 50px;
-      width: 450px;
+      background: linear-gradient(160deg, rgba(22, 24, 36, 0.97), rgba(12, 14, 22, 0.97));
+      border-top: 2px solid var(--danger);
+      border-radius: 28px;
+      padding: 40px;
+      width: min(90vw, 420px);
       z-index: 5000;
       text-align: center;
       display: none;
-      box-shadow: 0 0 100px rgba(255, 51, 85, 0.5);
+      box-shadow: 0 0 80px rgba(255, 51, 85, 0.35);
       animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(30px);
     }
 
     @keyframes popIn {
       from {
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0
       }
 
       to {
         transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
+        opacity: 1
       }
     }
 
-    .log-entry {
-      font-family: 'JetBrains Mono';
-      font-size: 14px;
-      margin-bottom: 15px;
-      padding-left: 18px;
-      border-left: 4px solid var(--neon-green);
+    .intensity-low {
+      color: #00ff88;
     }
 
-    .ts {
-      color: var(--neon-green);
-      font-weight: bold;
-      margin-right: 10px;
-      opacity: 0.7;
+    .intensity-medium {
+      color: var(--yellow);
     }
 
-    .sensor-pill {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 18px;
-      border-radius: 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 15px;
+    .intensity-high {
+      color: var(--danger);
     }
 
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      box-shadow: 0 0 10px currentColor;
+    .leaflet-container {
+      background: #ddd8ce;
+    }
+
+    /* Leaflet map fade vignette */
+    .escape-map-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      box-shadow: inset 0 0 60px rgba(2, 3, 8, 0.75), inset 0 -30px 40px rgba(2, 3, 8, 0.6), inset 0 30px 40px rgba(2, 3, 8, 0.4);
+      border-radius: 18px;
+    }
+
+    .escape-marker-green {
+      background: var(--accent);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 7px;
+      white-space: nowrap;
+      font-family: 'Outfit';
+      box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.7);
+      line-height: 1.3;
+      text-align: center;
+      animation: markerPulse 2s ease infinite;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+
+    .escape-marker-red {
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 7px;
+      white-space: nowrap;
+      font-family: 'Outfit';
+      box-shadow: 0 0 18px rgba(255, 51, 85, 0.7);
+      line-height: 1.3;
+      text-align: center;
+      animation: markerPulse 1.2s ease infinite;
+    }
+
+    .escape-marker-blue {
+      background: #00d4ff;
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 7px;
+      white-space: nowrap;
+      font-family: 'Outfit';
+      box-shadow: 0 0 14px rgba(0, 212, 255, 0.7);
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    @keyframes markerPulse {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.07)
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="particles-container" id="particlesContainer"></div>
+  <!-- ACCENT FLASH OVERLAY -->
+  <div id="venueFlash"></div>
 
-  <div class="fm-top-bar">
-    <div style="font-weight:800; letter-spacing:2px; display:flex; align-items:center; gap:12px; font-size:24px;">
-      <span class="material-icons" style="color:var(--neon-green); font-size:32px;">security</span> FLOWMATCH PRO
+  <!-- TOP BAR -->
+  <div id="topBar">
+    <div class="tb-brand">
+      <span class="material-icons" id="topBarIcon">security</span>
+      FLOWMATCH PRO
     </div>
-    <div id="stadiumHeader"
-      style="font-family:'JetBrains Mono'; font-size:12px; color:var(--neon-green); background:rgba(0,255,136,0.1); padding:10px 24px; border-radius:30px; border:1px solid rgba(0,255,136,0.2);">
-      AEGIS_STANDBY</div>
+    <div class="tb-center" id="stadiumHeader">SYNCED</div>
+    <div class="tb-right">
+      <div class="tb-event-badge" id="eventBadge">LIVE</div>
+      <div class="tb-saved">
+        <span class="material-icons" style="font-size:13px;">timer</span>
+        <span class="tb-saved-num" id="timeSavedNum">22</span>m saved
+      </div>
+      <div class="tb-disconnect" onclick="disconnectVenue()" title="Disconnect">
+        <span class="material-icons">power_settings_new</span>
+      </div>
+    </div>
   </div>
 
-  <!-- LOGIN SCREEN -->
+  <!-- LOGIN -->
   <div id="login-screen">
     <div class="login-card">
       <div class="ticket-emoji">🎟️</div>
       <h1>Scan or Enter Your Ticket</h1>
       <p>Your personal stadium AI activates instantly</p>
-
       <div class="auth-tabs">
         <div class="auth-tab active" id="tabID" onclick="switchAuthTab('id')">Enter Ticket ID</div>
         <div class="auth-tab" id="tabQR" onclick="switchAuthTab('qr')">Scan QR</div>
       </div>
-
-      <!-- Manual ID input -->
       <div class="ticket-input-wrap" id="idInputWrap">
-        <input type="text" id="ticketInput" placeholder="EVENT-VENUE-SEAT">
+        <input type="text" id="ticketInput" placeholder="IPL-AMD-G05" style="text-transform:uppercase;">
       </div>
-
-      <!-- QR Scanner -->
+      <div class="ticket-hints">
+        <span class="hint-pill" onclick="setHint('IPL-AMD-G05')">🏏 IPL-AMD-G05</span>
+        <span class="hint-pill" onclick="setHint('F1-BIC-P02')">🏎️ F1-BIC-P02</span>
+        <span class="hint-pill" onclick="setHint('CON-BLR-A12')">🎸 CON-BLR-A12</span>
+        <span class="hint-pill" onclick="setHint('IPL-WANKH-B03')">🏟️ IPL-WANKH-B03</span>
+      </div>
       <div id="qrWrap">
         <div class="scanner-frame">
           <video id="qrVideo" autoplay playsinline muted></video>
@@ -490,308 +2307,1120 @@
         <canvas id="qrCanvas"></canvas>
         <p id="qrStatus">Point camera at QR code...</p>
       </div>
-
-      <div class="privacy-note">
-        <span class="material-icons" style="color:var(--neon-green); font-size:24px;">location_on</span>
-        <span>
-          <b>Detected Node:</b>
-          <span id="detectedLoc" style="color:white; font-weight:800;">Syncing Location...</span><br>
-          <small>Aegis uses Geofencing to verify attendees. Data is session-only.</small>
-        </span>
+      <div class="location-note">
+        <span class="material-icons">location_on</span>
+        <span>Verifying near <strong id="detectedLoc" style="color:white;">the venue</strong>. Location is
+          session-only.</span>
       </div>
-
-      <button class="btn-green" id="enterBtn" onclick="enterVenue()">Sync with Aegis &rarr;</button>
+      <button class="btn-primary" id="enterBtn" onclick="enterVenue()">Sync with Aegis &rarr;</button>
     </div>
   </div>
 
   <!-- DASHBOARD -->
   <div id="dashboard-screen">
-    <div style="display:flex; flex-direction:column; gap:25px;">
-      <div class="panel">
-        <h2>MATCH TELEMETRY</h2>
-        <div>
-          <div id="intensityTitle" style="font-size:4.5rem; font-weight:800; letter-spacing:-5px;">...</div>
-          <div id="intensityDesc" style="font-size:14px; opacity:0.8;">Analyzing energy...</div>
+
+    <!-- HOME LEFT -->
+    <div id="col-left">
+      <div class="telemetry-panel">
+        <div class="panel-label" style="margin-bottom:10px;">
+          <div class="panel-dot"></div>Match Telemetry
         </div>
+        <div id="intensityTitle">...</div>
+        <div id="intensityDesc">Analyzing energy...</div>
       </div>
-      <div class="panel" style="flex:1;">
-        <h2>INTELLIGENCE FEED</h2>
-        <div id="logContainer"></div>
+      <div class="intel-feed-wrap">
+        <div class="panel-label" style="margin-bottom:10px;">
+          <div class="panel-dot"></div>Intelligence Feed
+        </div>
+        <div class="intel-stream">
+          <div id="logContainer"></div>
+        </div>
       </div>
     </div>
 
-    <main class="panel" style="text-align:center; justify-content:center;">
-      <div style="width:200px; height:200px; position:relative; margin:0 auto 30px auto;">
-        <div id="personaIcon" style="font-size:90px;">🏏</div>
-      </div>
-      <h2>DECISION CORE</h2>
-      <h1 id="recTitle" style="font-size:7rem; font-weight:800; margin:15px 0; letter-spacing:-8px; line-height:0.9;">
-        ...</h1>
-      <p id="recReason"
-        style="max-width:550px; margin:30px auto 0 auto; line-height:1.7; font-size:1.5rem; opacity:0.95;">Calibrating
-        windows...</p>
-    </main>
-
-    <div style="display:flex; flex-direction:column; gap:25px;">
-      <div class="panel" style="flex:1;">
-        <h2>STADIUM SENSORY ARRAY</h2>
-        <div id="zonesGrid"></div>
-        <div
-          style="margin-top:auto; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:30px; border-radius:28px;">
-          <div style="display:flex; align-items:center; gap:12px; color:#00d4ff; font-size:15px; font-weight:800;">
-            <span class="material-icons" style="font-size:24px;">local_taxi</span> SMART ESCAPE
+    <!-- HOME CENTER -->
+    <div id="col-center">
+      <div class="decision-core-wrap">
+        <div class="window-ring-wrap">
+          <svg class="window-ring-svg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+            <circle class="wr-track" cx="160" cy="160" r="148" />
+            <circle class="wr-arc-outer" cx="160" cy="160" r="154" stroke-dasharray="929.91" stroke-dashoffset="0"
+              fill="none" stroke-linecap="round" />
+            <circle class="wr-arc" id="windowArc" cx="160" cy="160" r="148" stroke-dasharray="929.91"
+              stroke-dashoffset="0" />
+          </svg>
+          <div class="window-ring-inner">
+            <div id="personaIcon">🏏</div>
+            <div class="dc-label">
+              <div class="dc-live-dot"></div>Decision Core<div class="dc-live-dot"></div>
+            </div>
+            <div id="recTitle">...</div>
           </div>
-          <p style="font-size:13px; margin:10px 0 0 0; opacity:0.8; line-height:1.7;">AI exit routing active.</p>
+        </div>
+        <div id="windowTimer">
+          <div class="wt-bar">
+            <div class="wt-fill" id="wtFill" style="width:80%"></div>
+          </div>
+          <span id="wtLabel">Window · 90s</span>
+          <div class="wt-bar">
+            <div class="wt-fill" id="wtFill2" style="width:80%"></div>
+          </div>
+        </div>
+        <p id="recReason">Calibrating windows...</p>
+      </div>
+    </div>
+
+    <!-- HOME RIGHT -->
+    <div id="col-right">
+      <div class="panel" style="flex:1;overflow:hidden;">
+        <div class="panel-label">
+          <div class="panel-dot"></div>Stadium Sensory Array
+        </div>
+        <div id="zonesGrid"></div>
+        <div class="smart-escape-strip">
+          <span class="material-icons">near_me</span>
+          <div>
+            <div class="se-label">SMART ESCAPE</div>
+            <div class="se-sub">AI exit routing active.</div>
+          </div>
         </div>
       </div>
-      <button class="panel"
-        style="background:rgba(255,51,85,0.1); border-color:rgba(255,51,85,0.3); color:var(--warning-red); font-weight:800; padding:35px; cursor:pointer; font-size:14px; align-items:center; flex-direction:row; justify-content:center; gap:14px;"
-        onclick="disconnectVenue()">
-        <span class="material-icons" style="font-size:24px;">power_settings_new</span> DISCONNECT
-      </button>
     </div>
-  </div>
 
+    <!-- SERVICE TAB -->
+    <div class="panel" id="service-hub" style="flex:1;overflow:hidden;">
+      <div id="concierge-hub">
+        <div id="hub-left">
+          <div class="alerts-panel">
+            <div class="panel-label" style="margin-bottom:10px;">
+              <div class="panel-dot"></div>My Alerts
+            </div>
+            <div id="alertsFeed"></div>
+          </div>
+        </div>
+        <div id="hub-center">
+          <div id="selection-state" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="svc-flow-card">
+              <div class="tier-instruction-title" id="tierInstruction">SECURE TOKEN NOW</div>
+              <div class="tier-reason" id="tierReason">Match entering low-action phase — ideal window for movement.
+              </div>
+              <div class="tier-proof" id="tierProof">
+                <div class="live-dot"></div>
+                <span id="tierProofText">East Stand Kiosk — 85% IDLE · Queue: ~2 min</span>
+              </div>
+              <div class="tier-warning">
+                <span class="material-icons"
+                  style="font-size:13px;color:var(--yellow);flex-shrink:0;margin-top:1px;">warning</span>
+                <span id="tierWarningText">AI detects 45 attendees in Section G05 planning a break.</span>
+              </div>
+              <div class="pipeline-row">
+                <div class="pipeline-item">
+                  <div class="pipeline-item-label">Phase</div>
+                  <div class="pipeline-item-val" id="tlPhase" style="color:var(--accent);">Strategic Timeout</div>
+                </div>
+                <div class="pipeline-item">
+                  <div class="pipeline-item-label">Intensity</div>
+                  <div class="pipeline-item-val" id="tlIntensity" style="color:var(--yellow);">Peak in 3m</div>
+                </div>
+                <div class="pipeline-item">
+                  <div class="pipeline-item-label">Window</div>
+                  <div class="pipeline-item-val" id="tlWindow" style="color:var(--accent);">MOVE NOW</div>
+                </div>
+              </div>
+            </div>
+            <div class="concession-section">
+              <div class="concession-grid-label">
+                <div class="panel-dot"></div>Smart Concession Grid
+              </div>
+              <div class="concession-grid" id="selectionGrid">
+                <div class="sel-item" id="selItem0">
+                  <div class="sel-emoji">🍟</div>
+                  <div class="sel-name">Fries</div><button class="sel-btn" onclick="selectItem(0)">Select</button>
+                </div>
+                <div class="sel-item" id="selItem1">
+                  <div class="sel-emoji">🥤</div>
+                  <div class="sel-name">Drink</div><button class="sel-btn" onclick="selectItem(1)">Select</button>
+                </div>
+                <div class="sel-item" id="selItem2">
+                  <div class="sel-emoji">🍿</div>
+                  <div class="sel-name">Popcorn</div><button class="sel-btn" onclick="selectItem(2)">Select</button>
+                </div>
+                <div class="sel-item" id="selItem3">
+                  <div class="sel-emoji">🌭</div>
+                  <div class="sel-name">Hot Dog</div><button class="sel-btn" onclick="selectItem(3)">Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="execution-state">
+            <div class="order-banner" id="orderActiveBanner">
+              <div class="live-dot"></div>
+              <div class="oab-text">ORDER ACTIVE</div>
+              <div class="live-dot"></div>
+            </div>
+            <div class="exec-hero">
+              <div class="exec-tag">
+                <div class="live-dot"></div><span>AEGIS NAVIGATION ACTIVE</span>
+                <div class="live-dot"></div>
+              </div>
+              <div class="exec-command">PROCEED<br>TO KIOSK</div>
+              <div class="exec-divider"></div>
+              <div class="exec-row"><span class="material-icons exec-icon">directions_walk</span>
+                <div>
+                  <div class="exec-label">Route</div>
+                  <div class="exec-val" id="execWalk">Walk Time: ~2 min</div>
+                </div>
+              </div>
+              <div class="exec-row"><span class="material-icons exec-icon">confirmation_number</span>
+                <div>
+                  <div class="exec-label">Identity</div>
+                  <div class="exec-val" id="execIdentity">Order #102 | Secured</div>
+                </div>
+              </div>
+              <div class="exec-row"><span class="material-icons exec-icon">storefront</span>
+                <div>
+                  <div class="exec-label">Destination</div>
+                  <div class="exec-val" id="execDest">East Stand Kiosk · G05</div>
+                </div>
+              </div>
+              <button class="exec-cancel" onclick="cancelOrder()"><span class="material-icons"
+                  style="font-size:14px;">close</span>Cancel Order</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE RIGHT -->
+    <div id="service-right">
+      <div class="token-card" id="smartTokenCard">
+        <div class="token-label">⬡ SMART TOKEN</div>
+        <div id="tokenIdle">
+          <div class="token-idle-msg">Select an item to generate your Smart Token and skip the queue.</div>
+        </div>
+        <div id="tokenActive" style="display:none;text-align:center;">
+          <div class="token-number" id="tokenNumber">#102</div>
+          <div class="token-sub" id="tokenSub">East Stand Kiosk · Gate 7</div>
+          <div class="countdown-wrap">
+            <svg class="countdown-ring" viewBox="0 0 110 110" style="width:100%;height:100%;">
+              <circle class="ring-bg" cx="55" cy="55" r="47" />
+              <circle class="ring-arc" id="ringArc" cx="55" cy="55" r="47" stroke-dasharray="295.31"
+                stroke-dashoffset="0" />
+            </svg>
+            <div class="countdown-inner">
+              <div id="cdTimer">5:00</div>
+              <div id="cdLabel">est. wait</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="tokenItemLabel">Loading...</div>
+        </div>
+      </div>
+      <div class="zone-info-card">
+        <div class="panel-label" style="margin-bottom:10px;">
+          <div class="panel-dot"></div>Your Zone
+        </div>
+        <div class="vi-row"><span class="material-icons vi-icon">place</span>
+          <div>
+            <div class="vi-label">Section</div>
+            <div class="vi-val" id="viSection">G05 → Gate 7</div>
+          </div>
+        </div>
+        <div class="vi-row"><span class="material-icons vi-icon">storefront</span>
+          <div>
+            <div class="vi-label">Nearest Concession</div>
+            <div class="vi-val" id="viConcession">East Stand Kiosk</div>
+          </div>
+        </div>
+        <div class="vi-row"><span class="material-icons vi-icon">directions_walk</span>
+          <div>
+            <div class="vi-label">Walk Time</div>
+            <div class="vi-val" id="viWalk">~2 min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCAPE LEFT -->
+    <div id="escape-left">
+      <div class="exit-status-panel">
+        <div class="panel-label" style="margin-bottom:12px;">
+          <div class="panel-dot"></div>My Exit Status
+        </div>
+        <div class="exit-meter-wrap">
+          <svg class="exit-ring-svg" viewBox="0 0 200 200">
+            <circle class="exit-ring-bg" cx="100" cy="100" r="84" stroke-dasharray="356.5 534.1" />
+            <circle class="exit-ring-fill" id="exitRingFill" cx="100" cy="100" r="84" stroke-dasharray="267.4 534.1" />
+          </svg>
+          <div class="exit-meter-inner">
+            <div class="exit-dist-label">DISTANCE<br>TO TRANSPORT</div>
+            <div class="exit-dist-num" id="exitDistNum">450</div>
+            <div class="exit-dist-unit">METERS</div>
+          </div>
+        </div>
+        <div class="exit-walk" id="exitWalkTime">~5 min walk</div>
+        <div style="text-align:center;">
+          <div class="exit-dest-pill" id="exitDestPill">North Metro Station</div>
+        </div>
+      </div>
+      <div class="exit-alerts-panel">
+        <div class="panel-label" style="margin-bottom:8px;">
+          <div class="panel-dot"></div>Exit Alerts
+        </div>
+        <div id="exitAlertsFeed"></div>
+      </div>
+    </div>
+
+    <!-- ESCAPE CENTER -->
+    <div id="escape-center">
+      <div class="escape-center-panel">
+        <div class="panel-label" style="flex-shrink:0;">
+          <div class="panel-dot"></div>Aegis Exit Corridor
+        </div>
+        <div class="escape-map-wrap">
+          <div id="escapeMapEl"></div>
+          <div class="map-overlay-badge"><span class="escape-dot"></span>LIVE · CORRIDOR SCAN</div>
+        </div>
+        <div id="escapeIRPW" style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <div class="ai-strategy-bar">
+            <div class="asb-item danger">
+              <div class="asb-label">Avoid</div>
+              <div class="asb-icon">🚫</div>
+              <div class="asb-val text-danger" id="qi-avoid">Gate 5</div>
+              <div class="asb-sub" id="qi-avoid-sub">92% density · 15min</div>
+            </div>
+            <div class="asb-item safe">
+              <div class="asb-label">Recommended</div>
+              <div class="asb-icon">✅</div>
+              <div class="asb-val text-safe" id="qi-rec">Gate 7</div>
+              <div class="asb-sub" id="qi-rec-sub">Clear · 2min wait</div>
+            </div>
+            <div class="asb-item">
+              <div class="asb-label">Transport</div>
+              <div class="asb-icon">🚇</div>
+              <div class="asb-val" id="qi-transport" style="color:var(--accent);">6 min</div>
+              <div class="asb-sub" id="qi-transport-sub">Metro · Platform clear</div>
+            </div>
+          </div>
+          <div class="warning-strip">
+            <span class="material-icons" style="font-size:13px;flex-shrink:0;margin-top:1px;">warning</span>
+            <span>Final ball rush in <strong id="rushCountdown" style="color:var(--danger);">8</strong> min. Current
+              exit: 6 min. Post-rush: 45 min.</span>
+          </div>
+          <button class="btn-escape-nav" id="startNavBtn" onclick="startGuidedNav()">
+            <span class="material-icons" style="font-size:17px;">near_me</span>START GUIDED NAV
+          </button>
+        </div>
+        <div id="escapeNavHero">
+          <div class="nav-active-hero">
+            <div class="nav-active-tag"><span class="escape-dot"></span>AEGIS NAVIGATION ACTIVE<span
+                class="escape-dot"></span></div>
+            <div class="nav-active-cmd" id="navActiveCmd">PROCEED STRAIGHT<br>NORTH RAMP</div>
+            <div class="nav-step-list">
+              <div class="nav-step-row current">
+                <span style="font-size:13px;">⬆</span>
+                <span class="nav-step-text" id="navStep1">Head north via Corridor D</span>
+                <span class="nav-step-dist" id="navDist1">200m</span>
+              </div>
+              <div class="nav-step-row next-step">
+                <span style="font-size:13px;opacity:0.5;">↗</span>
+                <span class="nav-step-text" style="opacity:0.6;" id="navStep2">Turn right at North Ramp junction</span>
+                <span class="nav-step-dist" style="opacity:0.6;">80m</span>
+              </div>
+              <div class="nav-step-row next-step">
+                <span style="font-size:13px;opacity:0.4;">🏁</span>
+                <span class="nav-step-text" style="opacity:0.5;" id="navStep3">Arrive Gate 7 — Clear entry</span>
+                <span class="nav-step-dist" style="opacity:0.4;color:var(--accent);">DEST</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn-escape-nav stop-mode" onclick="stopGuidedNav()">
+            <span class="material-icons" style="font-size:14px;">close</span>STOP NAVIGATION
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCAPE RIGHT -->
+    <div id="escape-right">
+      <div class="transport-hub-panel">
+        <div class="panel-label" style="margin-bottom:2px;">
+          <div class="panel-dot"></div>Transport Hub
+        </div>
+        <div class="transport-hub-sub">Stadium Sensory Array</div>
+        <div class="transport-item">
+          <div class="transport-item-head">
+            <span class="transport-item-icon">🚇</span>
+            <span class="transport-item-name" id="metroName">METRO RAIL</span>
+            <span class="transport-eta" id="metroEta">6 mins</span>
+          </div>
+          <div class="transport-bar-wrap">
+            <div class="transport-bar-fill load-clear" id="metroBar" style="width:75%"></div>
+          </div>
+          <div class="transport-meta" id="metroMeta">Next Train in 6 mins | Platform: <span
+              class="transport-status-pill pill-clear">CLEAR</span></div>
+        </div>
+        <div class="transport-item">
+          <div class="transport-item-head">
+            <span class="transport-item-icon">🚕</span>
+            <span class="transport-item-name">RIDESHARE</span>
+            <span class="transport-eta" id="rideEta">8 mins</span>
+          </div>
+          <div class="transport-bar-wrap">
+            <div class="transport-bar-fill load-moderate" id="rideBar" style="width:60%"></div>
+          </div>
+          <div class="transport-meta" id="rideMeta">ETA 8 mins | <span id="rideCars">12</span> cars nearby</div>
+        </div>
+        <div class="transport-item">
+          <div class="transport-item-head">
+            <span class="transport-item-icon">🅿️</span>
+            <span class="transport-item-name" id="parkName">PRIVATE PARKING</span>
+            <span class="transport-eta" id="parkEta">10 mins</span>
+          </div>
+          <div class="transport-bar-wrap">
+            <div class="transport-bar-fill load-moderate" id="parkBar" style="width:35%"></div>
+          </div>
+          <div class="transport-meta" id="parkMeta">Traffic: <span
+              class="transport-status-pill pill-moderate">MODERATE</span> | Exit: 10 mins</div>
+        </div>
+        <div class="safety-badge">
+          <div class="safety-check"><span class="material-icons">verified</span></div>
+          <div>
+            <div class="safety-badge-text">SAFETY CERTIFIED</div>
+            <div class="safety-badge-sub">Aegis Intelligence · Live monitoring</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dashboard-screen -->
+
+  <!-- BOTTOM NAV -->
   <div class="fm-bottom-bar" id="bottomNav">
-    <div style="opacity:1; color:var(--neon-green); text-align:center; font-weight:800;"><span
-        class="material-icons">home</span><br>Home</div>
-    <div style="opacity:0.3; text-align:center;"><span class="material-icons">room_service</span><br>Service</div>
-    <div style="opacity:0.3; text-align:center;"><span class="material-icons">near_me</span><br>Escape</div>
-    <div style="opacity:0.3; text-align:center;"><span class="material-icons">groups</span><br>Sync</div>
+    <div class="nav-item active active-home" id="nav-home" onclick="switchTab('home')">
+      <span class="material-icons">home</span>Home
+    </div>
+    <div class="nav-item" id="nav-service" onclick="switchTab('service')">
+      <span class="material-icons">room_service</span>Service
+    </div>
+    <div class="nav-item" id="nav-escape" onclick="switchTab('escape')">
+      <span class="material-icons">near_me</span>Escape
+    </div>
   </div>
 
   <!-- ERROR MODAL -->
   <div id="errorModal">
-    <span class="material-icons" style="font-size:5rem; color:var(--warning-red); margin-bottom:30px;">gpp_maybe</span>
-    <h3 id="errorTitle" style="font-size:2rem; letter-spacing:2px;">AEGIS SECURITY ALERT</h3>
-    <p id="errorMsg" style="font-size:18px; color:var(--text-muted); line-height:1.8; margin-bottom:40px;"></p>
-    <div style="display:flex; gap:18px;">
-      <button class="btn-green" style="background:var(--warning-red); color:white; flex:1;"
+    <span class="material-icons" style="font-size:3.5rem;color:var(--danger);margin-bottom:20px;">gpp_maybe</span>
+    <h3 id="errorTitle" style="font-size:clamp(1.2rem,2.2vw,1.6rem);letter-spacing:2px;margin-bottom:12px;">ACCESS
+      RESTRICTED</h3>
+    <p id="errorMsg" style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:32px;"></p>
+    <div style="display:flex;gap:12px;">
+      <button class="btn-primary" style="background:var(--danger);color:white;flex:1;"
         onclick="closeError()">RETRY</button>
-      <button id="overrideBtn" class="btn-green" style="background:#333; color:#fff; flex:1; display:none;"
+      <button id="overrideBtn" class="btn-primary" style="background:#1a1c28;color:#fff;flex:1;display:none;"
         onclick="proceedAnyway()">DEMO OVERRIDE</button>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script>
-    /* ── DATA ── */
-    const VENUE_DATA = {
-      'IPL': { sport: 'Cricket', persona: 'Captain 🏏', color: '#00ff88', events: ["Wicket Falls!", "Six Hit!", "Massive Cheer!"] },
-      'F1': { sport: 'F1', persona: 'Chief 🏎️', color: '#ff3355', events: ["Lead Change!", "Pit Window Open"] },
-      'CON': { sport: 'Concert', persona: 'Rockstar 🎸', color: '#bf00ff', events: ["Encore Start", "Solo Play"] }
+    /* ══════════════════════════════════════════════════════
+       NATIONAL MESH CONFIG — State-Aware Engine
+    ══════════════════════════════════════════════════════ */
+
+    // EVENT TYPES
+    const EVENT_CONFIG = {
+      IPL: {
+        sport: 'Cricket', sportLabel: 'IPL · T20', persona: '🏏', topIcon: 'sports_cricket',
+        accentHex: '#00ff88', accentRGB: '0,255,136',
+        phases: ['Strategic Timeout', 'Power Play Active', 'Death Overs', 'Mid-innings Break', 'Batting Collapse'],
+        intensityLabels: ['Peak Action in 3m', 'Settled Batting Phase', 'Wicket Cluster Brewing', 'Calm Patch — 8m'],
+        windowLabels: ['MOVE NOW · 90s remaining', 'HOLD · 2m to next break', 'OPTIMAL · Gate clear', 'WAIT · High tension'],
+        proofTexts: ['East Stand Kiosk — 85% IDLE · Queue: ~2 min', 'Gate Corridor — LOW DENSITY · 14 sec avg pass', 'North Food Court — 91% free · Token wait: 1m'],
+        feedEvents: [
+          { t: 'match', msg: 'Wicket falls — crowd erupts at Gate 4' }, { t: 'crowd', msg: 'Six hit — noise spike across East Stand' },
+          { t: 'match', msg: 'DRS review — tension across entire ground' }, { t: 'crowd', msg: 'Batting change imminent — crowd shifting' },
+          { t: 'security', msg: 'Last over begins — entry flow restricted' }, { t: 'crowd', msg: 'Maiden over — lull in crowd movement' },
+          { t: 'match', msg: 'Strategic Timeout called — 2m30s window' }, { t: 'security', msg: 'Power Play ends — gate pressure drops' }
+        ],
+        recommendations: ['OPEN', 'HOLD', 'MOVE', 'WAIT'],
+        reasons: ['Crowd flow nominal. Optimal movement window.', 'Wicket pressure — hold for 90 seconds.', 'Gate 3 is clearing fast. Move now.', 'High tension moment. Recommend staying seated.'],
+        concessionItems: [{ emoji: '🥘', name: 'Vada Pav' }, { emoji: '🍵', name: 'Masala Chai' }, { emoji: '🍿', name: 'Popcorn' }, { emoji: '🫔', name: 'Frankie' }],
+        urgencyLabel: 'BALL RUSH'
+      },
+      F1: {
+        sport: 'Formula 1', sportLabel: 'F1 · GRAND PRIX', persona: '🏎️', topIcon: 'sports_motorsports',
+        accentHex: '#ff3355', accentRGB: '255,51,85',
+        phases: ['Safety Car Deployed', 'Pit Window Open', 'Fastest Lap Attempt', 'VSC Period', 'Race Restart Imminent'],
+        intensityLabels: ['DRS Battle in 2m', 'Pit Window Closing', 'Calm Lap — 5m window', 'Lead Change Brewing'],
+        windowLabels: ['MOVE NOW · Pit straight clear', 'HOLD · Restart in 90s', 'OPTIMAL · Sector 2 gap', 'WAIT · SC ending soon'],
+        proofTexts: ['Grandstand Kiosk 7 — 79% IDLE · Token wait: 90s', 'Pit Lane Concourse — CLEAR · Flow optimal', 'North Concession — 3 of 4 counters FREE'],
+        feedEvents: [
+          { t: 'match', msg: 'Lead change — grandstand surge detected' }, { t: 'security', msg: 'Safety car deployed — crowd churn beginning' },
+          { t: 'crowd', msg: 'Pit window opens — food court pressure drop' }, { t: 'match', msg: 'Fastest lap — crowd energy spike' },
+          { t: 'crowd', msg: 'DRS zone cheer — South Stand peak' }, { t: 'security', msg: 'Race restart — all zones high density' },
+          { t: 'match', msg: 'Virtual Safety Car deployed — 5m window' }, { t: 'crowd', msg: 'Pit stop drama — sector 2 crowd surge' }
+        ],
+        recommendations: ['OPEN', 'HOLD', 'MOVE', 'WAIT'],
+        reasons: ['Pit straight clear. Ideal transition window.', 'SC period — avoid main thoroughfare now.', 'Concourse clearing. Move to Gate B.', 'Restart imminent. Stay in position.'],
+        concessionItems: [{ emoji: '🍟', name: 'Fries' }, { emoji: '⚡', name: 'Energy Drink' }, { emoji: '🍕', name: 'Slice' }, { emoji: '☕', name: 'Espresso' }],
+        urgencyLabel: 'FLAG RUSH'
+      },
+      CON: {
+        sport: 'Concert', sportLabel: 'LIVE CONCERT', persona: '🎤', topIcon: 'music_note',
+        accentHex: '#bf00ff', accentRGB: '191,0,255',
+        phases: ['Interlude — Crowd Calm', 'Setlist Climax Building', 'Encore Sequence Active', 'Band Transition', 'Floor Surge Detected'],
+        intensityLabels: ['Encore Peak in 4m', 'Solo Sequence Ongoing', 'Calm Patch — 6m', 'Pyro Build-up Detected'],
+        windowLabels: ['MOVE NOW · Side Exit D clear', 'HOLD · Peak song underway', 'OPTIMAL · Merch queue empty', 'WAIT · Crowd reversing'],
+        proofTexts: ['West Wing Bar — 88% IDLE · Queue: under 1 min', 'Merch Booth 3 — 0 queue · Attendant free', 'Floor Exit Corridor — LOW DENSITY'],
+        feedEvents: [
+          { t: 'crowd', msg: 'Encore starting — crowd pressure rising' }, { t: 'crowd', msg: 'Solo sequence — floor section surge' },
+          { t: 'security', msg: 'Pyro effect — west wing crowd reaction' }, { t: 'match', msg: 'Setlist climax — general admission peak' },
+          { t: 'crowd', msg: 'Interlude — low-pressure exit window open' }, { t: 'security', msg: 'Band returning — crowd flow reversing' },
+          { t: 'match', msg: 'New song begins — mosh pit forms floor zone' }, { t: 'crowd', msg: 'Set break — bar queue clearing fast' }
+        ],
+        recommendations: ['OPEN', 'HOLD', 'MOVE', 'WAIT'],
+        reasons: ['Interlude window active. Smooth exit possible.', 'Peak song underway. Hold for 2 minutes.', 'Side exit D is clear. Optimal path now.', 'Crowd returning — wait for next break.'],
+        concessionItems: [{ emoji: '🍺', name: 'Beer' }, { emoji: '🧋', name: 'Cold Brew' }, { emoji: '🍿', name: 'Popcorn' }, { emoji: '🌮', name: 'Taco' }],
+        urgencyLabel: 'ENCORE RUSH'
+      }
     };
 
-    const STADIUM_REGISTRY = {
-      'WANKH': { name: 'Wankhede Stadium', city: 'Mumbai', lat: 18.9389, lon: 72.8258 },
-      'NAREN': { name: 'Narendra Modi Stadium', city: 'Ahmedabad', lat: 23.0919, lon: 72.5975 },
-      'MCA': { name: 'MCA Stadium', city: 'Pune', lat: 18.6740, lon: 73.7073 }
+    // VENUE REGISTRY
+    const VENUE_REGISTRY = {
+      AMD: { name: 'Narendra Modi Stadium', city: 'Ahmedabad', lat: 23.0919, lon: 72.5975, transport: 'APMC Metro', gate: 'Gate 7', altGate: 'Gate 5' },
+      NAREN: { name: 'Narendra Modi Stadium', city: 'Ahmedabad', lat: 23.0919, lon: 72.5975, transport: 'APMC Metro', gate: 'Gate 7', altGate: 'Gate 5' },
+      WANKH: { name: 'Wankhede Stadium', city: 'Mumbai', lat: 18.9389, lon: 72.8258, transport: 'Churchgate Station', gate: 'Gate C (North)', altGate: 'Gate A (South)' },
+      BIC: { name: 'Buddh Int. Circuit', city: 'Greater Noida', lat: 28.3487, lon: 77.5386, transport: 'Shuttle Lot A', gate: 'North Ramp', altGate: 'South Gate' },
+      EDEN: { name: 'Eden Gardens', city: 'Kolkata', lat: 22.5646, lon: 88.3433, transport: 'Esplanade Metro', gate: 'Gate 3', altGate: 'Gate 1' },
+      BLR: { name: 'Chinnaswamy Stadium', city: 'Bengaluru', lat: 12.9794, lon: 77.5997, transport: 'Cubbon Park Metro', gate: 'Gate 1', altGate: 'Gate 4' },
+      HPCA: { name: 'HPCA Stadium', city: 'Dharamshala', lat: 32.2190, lon: 76.3234, transport: 'Dharamshala Bus Stand', gate: 'South Gate', altGate: 'North Gate' },
+      MCA: { name: 'MCA Stadium', city: 'Pune', lat: 18.6740, lon: 73.7073, transport: 'Shivajinagar BRT', gate: 'Gate 4 (East)', altGate: 'Gate 1 (West)' },
+      DEFAULT: { name: 'Stadium', city: 'India', lat: 23.0919, lon: 72.5975, transport: 'Metro Station', gate: 'Gate 7', altGate: 'Gate 5' }
     };
 
-    let userCoords = null;
-    let lastAttemptedConfig = null;
-    let qrStream = null;
-    let qrAnimFrame = null;
-    let qrScanned = false;
+    const TRANSPORT_CONFIG = {
+      AMD: { metro: { name: 'METRO RAIL', etaSec: 360, platform: 'CLEAR', load: 75 }, ride: { etaSec: 480, cars: 12, load: 58 }, park: { name: 'PRIVATE PARKING (LOT A)', traffic: 'MODERATE', exitTimeSec: 600, load: 35 } },
+      NAREN: { metro: { name: 'METRO RAIL', etaSec: 360, platform: 'CLEAR', load: 75 }, ride: { etaSec: 480, cars: 12, load: 58 }, park: { name: 'PRIVATE PARKING (LOT A)', traffic: 'MODERATE', exitTimeSec: 600, load: 35 } },
+      WANKH: { metro: { name: 'LOCAL RAIL', etaSec: 480, platform: 'MODERATE', load: 68 }, ride: { etaSec: 600, cars: 8, load: 72 }, park: { name: 'PRIVATE PARKING (LOT B)', traffic: 'HIGH', exitTimeSec: 900, load: 82 } },
+      BIC: { metro: { name: 'SHUTTLE BUS', etaSec: 300, platform: 'CLEAR', load: 40 }, ride: { etaSec: 420, cars: 20, load: 35 }, park: { name: 'CIRCUIT PARKING (ZONE A)', traffic: 'LOW', exitTimeSec: 480, load: 28 } },
+      EDEN: { metro: { name: 'METRO RAIL', etaSec: 420, platform: 'MODERATE', load: 62 }, ride: { etaSec: 360, cars: 15, load: 55 }, park: { name: 'PRIVATE PARKING', traffic: 'MODERATE', exitTimeSec: 540, load: 60 } },
+      BLR: { metro: { name: 'METRO RAIL', etaSec: 300, platform: 'CLEAR', load: 50 }, ride: { etaSec: 360, cars: 18, load: 42 }, park: { name: 'PRIVATE PARKING (LOT C)', traffic: 'LOW', exitTimeSec: 420, load: 25 } },
+      HPCA: { metro: { name: 'BUS STAND', etaSec: 720, platform: 'CLEAR', load: 30 }, ride: { etaSec: 480, cars: 6, load: 25 }, park: { name: 'STADIUM PARKING', traffic: 'LOW', exitTimeSec: 360, load: 18 } },
+      MCA: { metro: { name: 'BUS RAPID TRANSIT', etaSec: 540, platform: 'CLEAR', load: 45 }, ride: { etaSec: 360, cars: 15, load: 40 }, park: { name: 'PRIVATE PARKING (LOT C)', traffic: 'LOW', exitTimeSec: 480, load: 22 } },
+      DEFAULT: { metro: { name: 'METRO RAIL', etaSec: 360, platform: 'CLEAR', load: 60 }, ride: { etaSec: 480, cars: 10, load: 50 }, park: { name: 'PRIVATE PARKING', traffic: 'MODERATE', exitTimeSec: 600, load: 40 } }
+    };
 
-    /* ── GEOLOCATION ── */
+    const ALERT_POOL = {
+      IPL: [{ tag: 'order', msg: 'Your Masala Chai is being prepared at the kiosk.' }, { tag: 'friend', msg: 'Arjun (Row G, Seat 12) is 30m from your section.' }, { tag: 'system', msg: 'Token confirmed — ready in 4 mins.' }, { tag: 'order', msg: 'Pickup window opens in 2 mins. Head to Counter 3.' }, { tag: 'friend', msg: 'Rahul just entered same block as you.' }],
+      F1: [{ tag: 'order', msg: 'Your Espresso is queued at Grandstand Kiosk 7.' }, { tag: 'friend', msg: 'Marco (Sector B, Seat 8) is 20m away.' }, { tag: 'system', msg: 'Token ready in 3 mins.' }, { tag: 'order', msg: 'Order ready. Proceed to Counter 2 now.' }, { tag: 'friend', msg: 'Julia just arrived at the pit wall viewing zone.' }],
+      CON: [{ tag: 'order', msg: 'Your Cold Brew is being poured at West Wing Bar.' }, { tag: 'friend', msg: 'Priya (Floor Zone B) is 15m from your position.' }, { tag: 'system', msg: 'Token ready — skip queue · Booth 3 is free.' }, { tag: 'order', msg: 'Pickup available now. Merch Booth 3 — no queue.' }, { tag: 'friend', msg: 'Sam entering via Side Exit D — heading your way.' }]
+    };
+
+    const EXIT_ALERT_POOL = {
+      IPL: [['{t} Gate 5 Flow', 'CRITICAL (92% Load)', 'critical'], ['{t} Gate 7', 'CLEAR VECTOR', 'clear'], ['{t} Corridor D', 'Clear Vector', 'clear'], ['{t} North Metro', 'High Availability', 'clear'], ['{t} Corridor A', 'MODERATE density', 'moderate'], ['{t} Rideshare Zone', 'Surge pricing soon', 'moderate']],
+      F1: [['{t} Pit Exit', 'CRITICAL (88% Load)', 'critical'], ['{t} Gate C (North)', 'CLEAR VECTOR', 'clear'], ['{t} Main Concourse', 'MODERATE density', 'moderate'], ['{t} Shuttle Lot A', 'CLEAR', 'clear'], ['{t} Exit D', 'CLEAR VECTOR', 'clear']],
+      CON: [['{t} Side Exit A', 'CRITICAL (79% Load)', 'critical'], ['{t} Exit D (West)', 'CLEAR VECTOR', 'clear'], ['{t} Merch Queue', 'All booths clear', 'clear'], ['{t} Metro Platform', 'MODERATE load', 'moderate'], ['{t} Rideshare', 'Surge pricing active', 'critical']]
+    };
+
+    const ZONES = ['Gate A', 'Gate B', 'Food Court', 'Main Stand', 'East Wing', 'West Wing'];
+    const STATUS_OPTIONS = ['CLEAR', 'MODERATE', 'BUSY'];
+    const STATUS_COLORS = { CLEAR: '#00ff88', MODERATE: '#ffcc00', BUSY: '#ff3355' };
+    const INTENSITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH'];
+    const INTENSITY_DESCS = { LOW: 'Crowd energy calm. Ideal movement window.', MEDIUM: 'Energy building — stay aware of surroundings.', HIGH: '⚡ Peak intensity. Maximum crowd engagement.' };
+    const INTENSITY_COLORS_MAP = { LOW: '#00ff88', MEDIUM: '#ffcc00', HIGH: '#ff3355' };
+    const LOG_ICON = { match: '⚡', crowd: '👥', security: '🛡️' };
+    const LOG_CLASS = { match: 'log-match', crowd: 'log-crowd', security: 'log-security' };
+
+    /* ── State ── */
+    let userCoords = null, lastAttemptedConfig = null;
+    let activeEventType = 'IPL', userSection = 'G05', currentVenueCode = 'AMD';
+    let currentVenue = VENUE_REGISTRY.AMD;
+    let qrStream = null, qrAnimFrame = null, qrScanned = false;
+    let simInterval = null, activeTab = 'home';
+    let orderActive = false, selectedItemIdx = -1;
+    let countdownSec = 300, countdownInterval = null;
+    let timeSavedMin = 22, lastSimState = {};
+    let activeOrderNum = 102;
+    let escapeMapInitialized = false, escapeLeafMap = null, escapeNavActive = false;
+    let exitDistanceM = 450, exitRushMin = 8;
+    let windowArcTotal = 929.91, windowArcInterval = null;
+    let currentTransport = null;
+    let accentTransitioning = false;
+
+    /* ── Hint Pills ── */
+    function setHint(val) {
+      document.getElementById('ticketInput').value = val;
+      document.getElementById('ticketInput').focus();
+    }
+
+    /* ── Geolocation ── */
     window.onload = () => {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userCoords.lat}&lon=${userCoords.lon}`);
-            const data = await res.json();
-            document.getElementById('detectedLoc').innerText =
-              data.address.city || data.address.town || data.address.state || "Active Node";
-          } catch { document.getElementById('detectedLoc').innerText = "India Mesh Node"; }
-        },
-        () => {
-          document.getElementById('detectedLoc').innerText = "Simulated: India Node";
-          userCoords = { lat: 18.5204, lon: 73.8567 };
-        }
-      );
+      if (!navigator.geolocation) { setDefaultCoords(); return; }
+      navigator.geolocation.getCurrentPosition(async pos => {
+        userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userCoords.lat}&lon=${userCoords.lon}`);
+          const data = await res.json();
+          const label = data?.address?.city || data?.address?.town || data?.address?.state || 'your area';
+          document.getElementById('detectedLoc').innerText = label;
+        } catch { document.getElementById('detectedLoc').innerText = 'your area'; }
+      }, () => setDefaultCoords());
     };
+    function setDefaultCoords() { userCoords = { lat: 18.5204, lon: 73.8567 }; document.getElementById('detectedLoc').innerText = 'India'; }
 
-    /* ── TAB SWITCH ── */
+    /* ── Core: syncTicketContext ── */
+    function syncTicketContext(eventType, venueCode, section) {
+      const cfg = EVENT_CONFIG[eventType] || EVENT_CONFIG.IPL;
+      const venue = VENUE_REGISTRY[venueCode] || VENUE_REGISTRY.DEFAULT;
+      const transport = TRANSPORT_CONFIG[venueCode] || TRANSPORT_CONFIG.DEFAULT;
+      const sInfo = parseSection(section, venue);
+
+      activeEventType = eventType;
+      currentVenueCode = venueCode;
+      currentVenue = venue;
+      currentTransport = JSON.parse(JSON.stringify(transport)); // deep clone for live mutation
+
+      // ── ACCENT SYSTEM OVERHAUL ──
+      applyAccent(cfg.accentHex, cfg.accentRGB);
+
+      // ── TOP BAR ──
+      document.getElementById('topBarIcon').textContent = cfg.topIcon;
+      document.getElementById('stadiumHeader').innerText = venue.name.toUpperCase();
+      document.getElementById('eventBadge').innerText = cfg.sportLabel;
+
+      // ── DECISION CORE ICON ──
+      document.getElementById('personaIcon').innerText = cfg.persona;
+
+      // ── SERVICE TAB ──
+      document.getElementById('tierWarningText').innerText = `AI detects 45 attendees in Section ${section} planning a break. Digital queue spikes +12 min if you wait 60s longer.`;
+      document.getElementById('tierProofText').innerText = `${sInfo.concession} — 85% IDLE · Queue: ~2 min`;
+      document.getElementById('viSection').innerText = `${section} → ${sInfo.gate}`;
+      document.getElementById('viConcession').innerText = sInfo.concession;
+      document.getElementById('viWalk').innerText = sInfo.walk;
+      document.getElementById('tokenSub').innerText = `${sInfo.concession} · ${sInfo.gate}`;
+
+      // Concession grid
+      cfg.concessionItems.forEach((item, i) => {
+        const el = document.getElementById(`selItem${i}`);
+        if (el) {
+          el.querySelector('.sel-emoji').innerText = item.emoji;
+          el.querySelector('.sel-name').innerText = item.name;
+          el.querySelector('.sel-btn').innerText = 'Select';
+          el.classList.remove('selected');
+        }
+      });
+
+      // ── ESCAPE TAB ──
+      document.getElementById('exitDestPill').innerText = transport.metro.station || transport.metro.name;
+      document.getElementById('qi-avoid').innerText = venue.altGate || 'Gate 5';
+      document.getElementById('qi-avoid-sub').innerText = '92% density · 15min';
+      document.getElementById('qi-rec').innerText = venue.gate || 'Gate 7';
+      document.getElementById('qi-rec-sub').innerText = 'Clear · 2min wait';
+      document.getElementById('qi-transport').innerText = `${Math.round(transport.metro.etaSec / 60)} min`;
+      document.getElementById('qi-transport-sub').innerText = `${transport.metro.name} · ${transport.metro.platform}`;
+      document.getElementById('metroName').innerText = transport.metro.name;
+
+      // Nav steps contextual
+      document.getElementById('navStep2').innerText = `Turn right at ${venue.gate} junction`;
+      document.getElementById('navStep3').innerText = `Arrive ${venue.gate} — Clear entry`;
+
+      // Rush label
+      document.getElementById('rushCountdown').innerText = exitRushMin;
+
+      updateTransportUI(currentTransport);
+      exitDistanceM = 420 + Math.floor(Math.random() * 60);
+      updateExitMeter();
+    }
+
+    function applyAccent(hex, rgb) {
+      // Flash overlay
+      document.documentElement.style.setProperty('--accent', hex);
+      document.documentElement.style.setProperty('--accent-rgb', rgb);
+      document.documentElement.style.setProperty('--accent-dim', `rgba(${rgb},0.12)`);
+      document.documentElement.style.setProperty('--accent-glow', `rgba(${rgb},0.3)`);
+
+      // Trigger flash
+      const flash = document.getElementById('venueFlash');
+      flash.style.background = `radial-gradient(ellipse at center, rgba(${rgb},0.2) 0%, transparent 70%)`;
+      flash.classList.remove('flash');
+      void flash.offsetWidth;
+      flash.classList.add('flash');
+
+      // Body bg gradient update
+      document.body.style.backgroundImage = `radial-gradient(ellipse 80% 60% at 50% -10%, rgba(${rgb},0.07) 0%, transparent 65%), radial-gradient(circle at 50% 50%, #06080f 0%, #020308 100%)`;
+    }
+
+    function parseSection(s, venue) {
+      if (!s) return { gate: venue?.gate || 'Gate 7', concession: 'North Food Court', walk: '~2 min (via Corridor B)' };
+      const alpha = s.match(/[A-Z]/)?.[0] || 'G';
+      const num = parseInt(s.match(/\d+/)?.[0] || '4', 10);
+      const gateMap = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8 };
+      const gateNum = gateMap[alpha] || num || 4;
+      const concessions = ['North Food Court', 'South Concourse Bar', 'East Stand Kiosk', 'West Wing Bar', 'VIP Lounge Counter'];
+      const concession = concessions[gateNum % concessions.length];
+      const walk = `~${1 + (gateNum % 3)} min (via Corridor ${String.fromCharCode(65 + (gateNum % 4))})`;
+      return { gate: venue?.gate || `Gate ${gateNum}`, concession, walk };
+    }
+
+    /* ── Auth ── */
     function switchAuthTab(type) {
       const isQR = type === 'qr';
       document.getElementById('tabID').classList.toggle('active', !isQR);
       document.getElementById('tabQR').classList.toggle('active', isQR);
       document.getElementById('idInputWrap').style.display = isQR ? 'none' : 'block';
-
-      if (isQR) {
-        startQRScanner();
-      } else {
-        stopQRScanner();
-      }
+      isQR ? startQRScanner() : stopQRScanner();
     }
-
-    /* ── QR SCANNER START ── */
     async function startQRScanner() {
-      const wrap = document.getElementById('qrWrap');
-      const video = document.getElementById('qrVideo');
-      const status = document.getElementById('qrStatus');
-
-      wrap.classList.add('visible');
-      qrScanned = false;
-      status.className = '';
-      status.innerText = 'Point camera at QR code...';
-
-      try {
-        qrStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }   // rear cam on mobile
-        });
-        video.srcObject = qrStream;
-        video.play();
-        video.onloadedmetadata = () => scanLoop();
-      } catch (err) {
-        status.className = 'error';
-        status.innerText = '⚠ Camera access denied. Use manual entry.';
-      }
+      const wrap = document.getElementById('qrWrap'), video = document.getElementById('qrVideo'), status = document.getElementById('qrStatus');
+      wrap.classList.add('visible'); qrScanned = false; status.className = ''; status.innerText = 'Point camera at QR code...';
+      try { qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); video.srcObject = qrStream; video.play(); video.onloadedmetadata = () => scanLoop(); }
+      catch { status.className = 'error'; status.innerText = '⚠ Camera access denied. Use manual entry.'; }
     }
-
-    /* ── QR SCANNER STOP ── */
     function stopQRScanner() {
       if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
       if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
       document.getElementById('qrWrap').classList.remove('visible');
     }
-
-    /* ── SCAN LOOP (frame-by-frame jsQR) ── */
     function scanLoop() {
       if (qrScanned) return;
-
-      const video = document.getElementById('qrVideo');
-      const canvas = document.getElementById('qrCanvas');
-      const ctx = canvas.getContext('2d');
-
+      const video = document.getElementById('qrVideo'), canvas = document.getElementById('qrCanvas'), ctx = canvas.getContext('2d');
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert'
-        });
-
-        if (code) {
-          qrScanned = true;
-          onQRDetected(code.data);
-          return;
-        }
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+        if (code) { qrScanned = true; onQRDetected(code.data); return; }
       }
-
       qrAnimFrame = requestAnimationFrame(scanLoop);
     }
-
-    /* ── QR DETECTED ── */
     function onQRDetected(rawData) {
-      const status = document.getElementById('qrStatus');
-      const ticket = rawData.trim().toUpperCase();
-
-      status.className = 'success';
-      status.innerText = `✓ Detected: ${ticket}`;
-
+      const status = document.getElementById('qrStatus'), ticket = rawData.trim().toUpperCase();
+      status.className = 'success'; status.innerText = `✓ Detected: ${ticket}`;
       stopQRScanner();
-
-      // Switch UI back to ID tab and fill input
-      document.getElementById('tabID').classList.add('active');
-      document.getElementById('tabQR').classList.remove('active');
+      document.getElementById('tabID').classList.add('active'); document.getElementById('tabQR').classList.remove('active');
       document.getElementById('idInputWrap').style.display = 'block';
       document.getElementById('ticketInput').value = ticket;
-
-      // Small pause so user sees the success, then auto-enter
       setTimeout(() => enterVenue(), 800);
     }
 
-    /* ── VENUE ENTRY ── */
+    /* ── Venue Entry ── */
     async function enterVenue() {
-      const input = document.getElementById('ticketInput');
-      const btn = document.getElementById('enterBtn');
-      const ticket = input.value.toUpperCase();
-
-      const ticketRegex = /^[A-Z0-9]{2,3}-[A-Z]{3,5}-[A-Z0-9]{2,5}$/;
-      if (!ticketRegex.test(ticket)) {
-        showError("Format Mismatch", "Ticket ID must follow: [TYPE]-[STADIUM]-[SEAT].", false);
-        return;
-      }
-
-      const [prefix, venueCode] = ticket.split('-');
-      btn.disabled = true;
-      btn.innerText = "AUTHENTICATING...";
-
-      if (venueCode === "MARS") {
-        showError("Node Rejected", "Aegis detected a Virtual Spoof attempt.", false);
-        resetBtn(btn); return;
-      }
-
-      const knownVenue = STADIUM_REGISTRY[venueCode];
-      lastAttemptedConfig = { prefix, venueCode, name: knownVenue ? knownVenue.name : venueCode };
-
-      if (knownVenue) {
-        if (!userCoords) {
-          showError("Syncing Node...", "Aegis is still locating your node. Please wait 2 seconds.", false);
-          resetBtn(btn); return;
-        }
+      const input = document.getElementById('ticketInput'), btn = document.getElementById('enterBtn');
+      const ticket = input.value.toUpperCase().trim();
+      const ticketRegex = /^[A-Z0-9]{2,3}-[A-Z]{2,5}-[A-Z0-9]{2,5}$/;
+      if (!ticketRegex.test(ticket)) { showError('Format Mismatch', 'Ticket ID must follow: [TYPE]-[VENUE]-[SEAT]. Try IPL-AMD-G05', false); return; }
+      const parts = ticket.split('-');
+      const prefix = parts[0], venueCode = parts[1], section = parts[2] || 'G05';
+      btn.disabled = true; btn.innerText = 'AUTHENTICATING...';
+      if (venueCode === 'MARS') { showError('Node Rejected', 'Virtual spoof attempt detected.', false); resetBtn(btn); return; }
+      const knownVenue = VENUE_REGISTRY[venueCode];
+      lastAttemptedConfig = { prefix, venueCode, section, name: knownVenue ? knownVenue.name : venueCode };
+      if (knownVenue && userCoords) {
         const dist = getDistance(userCoords.lat, userCoords.lon, knownVenue.lat, knownVenue.lon);
-        if (dist > 150) {
-          showError("Geofence Violation",
-            `Aegis detected your node (${document.getElementById('detectedLoc').innerText}) is far from the stadium. Access restricted.`, true);
-          resetBtn(btn); return;
-        }
+        if (dist > 150) { showError('Location Mismatch', `Your location doesn't appear near ${knownVenue.name}. Use Demo Override to continue in demo mode.`, true); resetBtn(btn); return; }
       }
-
       proceedAnyway();
     }
 
     function proceedAnyway() {
       if (!lastAttemptedConfig) return;
-      const { prefix, name } = lastAttemptedConfig;
-      const config = VENUE_DATA[prefix] || VENUE_DATA['IPL'];
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard-screen').classList.add('active');
+      const { prefix, venueCode, section } = lastAttemptedConfig;
+      userSection = section || 'G05';
+      const eventType = EVENT_CONFIG[prefix] ? prefix : 'IPL';
+
+      // ── SYNC ALL CONTEXT ──
+      syncTicketContext(eventType, venueCode, userSection);
+
+      // Show dashboard
+      const login = document.getElementById('login-screen');
+      login.style.transition = 'opacity 0.45s ease';
+      login.style.opacity = '0';
+      setTimeout(() => { login.style.display = 'none'; }, 450);
+
+      document.getElementById('topBar').classList.add('visible');
+      document.getElementById('dashboard-screen').classList.add('active', 'layout-home');
       document.getElementById('bottomNav').style.display = 'flex';
-      document.getElementById('stadiumHeader').innerText = name.toUpperCase();
-      document.getElementById('personaIcon').innerText = config.persona.split(' ')[1];
-      document.documentElement.style.setProperty('--neon-green', config.color);
       closeError();
-      addLog("Aegis Neural Mesh Connected.");
+
+      addLog('security', 'Aegis Neural Mesh connected to national node.');
+      activeTab = 'home';
+      renderNavActive('home');
+      applyTabEnterAnim(['col-left', 'col-center', 'col-right']);
+      startSimulation();
+      startWindowRing();
     }
 
+    /* ── Window Ring ── */
+    function startWindowRing(durationSec = 90) {
+      if (windowArcInterval) clearInterval(windowArcInterval);
+      const arc = document.getElementById('windowArc');
+      const fill = document.getElementById('wtFill');
+      const fill2 = document.getElementById('wtFill2');
+      const wt = document.getElementById('wtLabel');
+      const total = windowArcTotal;
+      let remaining = durationSec;
+      function update() {
+        const pct = remaining / durationSec;
+        const offset = total * (1 - pct);
+        if (arc) arc.style.strokeDashoffset = offset;
+        if (fill) fill.style.width = `${pct * 100}%`;
+        if (fill2) fill2.style.width = `${pct * 100}%`;
+        if (wt) wt.innerText = `Window · ${remaining}s`;
+        if (remaining <= 0) clearInterval(windowArcInterval);
+        remaining--;
+      }
+      update();
+      windowArcInterval = setInterval(update, 1000);
+    }
+
+    /* ── Transport UI ── */
+    function updateTransportUI(hub) {
+      const metroEtaMin = Math.round(hub.metro.etaSec / 60);
+      const rideEtaMin = Math.round(hub.ride.etaSec / 60);
+      const parkEtaMin = Math.round(hub.park.exitTimeSec / 60);
+      const rideCarsEl = document.getElementById('rideCars');
+      document.getElementById('metroEta').innerText = `${metroEtaMin} mins`;
+      document.getElementById('rideEta').innerText = `${rideEtaMin} mins`;
+      document.getElementById('parkEta').innerText = `${parkEtaMin} mins`;
+      if (rideCarsEl) rideCarsEl.innerText = hub.ride.cars;
+      document.getElementById('parkName').innerText = hub.park.name;
+      const mb = document.getElementById('metroBar'); mb.style.width = `${hub.metro.load}%`;
+      mb.className = `transport-bar-fill ${hub.metro.load > 60 ? 'load-clear' : hub.metro.load > 40 ? 'load-moderate' : 'load-busy'}`;
+      const rb = document.getElementById('rideBar'); rb.style.width = `${hub.ride.load}%`;
+      rb.className = `transport-bar-fill ${hub.ride.load < 50 ? 'load-clear' : hub.ride.load < 70 ? 'load-moderate' : 'load-busy'}`;
+      const pb = document.getElementById('parkBar'); pb.style.width = `${hub.park.load}%`;
+      pb.className = `transport-bar-fill ${hub.park.load < 40 ? 'load-clear' : hub.park.load < 70 ? 'load-moderate' : 'load-busy'}`;
+      const platStatus = hub.metro.platform;
+      const platClass = platStatus === 'CLEAR' ? 'pill-clear' : platStatus === 'MODERATE' ? 'pill-moderate' : 'pill-busy';
+      document.getElementById('metroMeta').innerHTML = `Next Train in ${metroEtaMin} mins | Platform: <span class="transport-status-pill ${platClass}">${platStatus}</span>`;
+      document.getElementById('rideMeta').innerHTML = `ETA ${rideEtaMin} mins | <span id="rideCars">${hub.ride.cars}</span> cars nearby`;
+      const trafficStatus = hub.park.traffic;
+      const trafficClass = trafficStatus === 'LOW' ? 'pill-clear' : trafficStatus === 'MODERATE' ? 'pill-moderate' : 'pill-busy';
+      document.getElementById('parkMeta').innerHTML = `Traffic: <span class="transport-status-pill ${trafficClass}">${trafficStatus}</span> | Exit: ${parkEtaMin} mins`;
+    }
+
+    function updateExitMeter() {
+      const maxDist = 600;
+      const pct = Math.max(0, Math.min(1, 1 - (exitDistanceM / maxDist)));
+      const fullArc = 395.8, totalCirc = 527.8;
+      const fillAmt = fullArc * Math.max(0.08, pct);
+      const arc = document.getElementById('exitRingFill');
+      if (arc) arc.setAttribute('stroke-dasharray', `${fillAmt.toFixed(1)} ${totalCirc}`);
+      document.getElementById('exitDistNum').innerText = exitDistanceM;
+      const walkMin = Math.ceil(exitDistanceM / 90);
+      document.getElementById('exitWalkTime').innerText = `~${walkMin} min walk`;
+      if (currentTransport) {
+        const qiT = document.getElementById('qi-transport');
+        if (qiT) qiT.innerText = `${Math.round(currentTransport.metro.etaSec / 60)} min`;
+      }
+    }
+
+    /* ── Leaflet Map ── */
+    function initEscapeMap() {
+      if (escapeMapInitialized) return;
+      const venue = currentVenue;
+      const mapEl = document.getElementById('escapeMapEl');
+      if (!mapEl || !mapEl.offsetHeight) return;
+      const center = [venue.lat, venue.lon];
+      const seatOffset = [venue.lat - 0.0011, venue.lon - 0.0013];
+      const gateRed = [venue.lat - 0.0022, venue.lon - 0.0007];
+      const gateGreen = [venue.lat + 0.0023, venue.lon + 0.0017];
+      escapeLeafMap = L.map('escapeMapEl', { zoomControl: false, attributionControl: false }).setView(center, 16);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(escapeLeafMap);
+      L.control.zoom({ position: 'topright' }).addTo(escapeLeafMap);
+      const gate5Icon = L.divIcon({ className: '', html: `<div class="escape-marker-red">${venue.altGate || 'Gate 5'}<br><span style="font-size:8px;opacity:0.85;">CONGESTED</span></div>`, iconAnchor: [45, 20] });
+      L.marker(gateRed, { icon: gate5Icon }).addTo(escapeLeafMap);
+      const gate7Icon = L.divIcon({ className: '', html: `<div class="escape-marker-green">${venue.gate || 'Gate 7'}<br><span style="font-size:8px;opacity:0.85;">(RECOMMENDED)</span></div>`, iconAnchor: [55, 20] });
+      L.marker(gateGreen, { icon: gate7Icon }).addTo(escapeLeafMap);
+      const seatIcon = L.divIcon({ className: '', html: `<div class="escape-marker-blue">YOUR SEAT<br><span style="font-size:8px;">(${userSection})</span></div>`, iconAnchor: [38, 20] });
+      L.marker(seatOffset, { icon: seatIcon }).addTo(escapeLeafMap);
+      const midLat = (seatOffset[0] + gateGreen[0]) / 2;
+      const midLon = (seatOffset[1] + gateGreen[1]) / 2 + 0.002;
+      const cfg = EVENT_CONFIG[activeEventType] || EVENT_CONFIG.IPL;
+      const lineColor = cfg.accentHex || '#00ffaa';
+      L.polyline([seatOffset, [midLat, midLon], gateGreen], { color: lineColor, weight: 3, opacity: 0.85, dashArray: '10 7' }).addTo(escapeLeafMap);
+      L.circle(gateRed, { color: '#ff3355', fillColor: '#ff3355', fillOpacity: 0.12, radius: 45, weight: 2, opacity: 0.7 }).addTo(escapeLeafMap);
+      L.circle(gateGreen, { color: lineColor, fillColor: lineColor, fillOpacity: 0.1, radius: 35, weight: 2, opacity: 0.6 }).addTo(escapeLeafMap);
+      escapeMapInitialized = true;
+    }
+
+    /* ── Guided Nav ── */
+    function startGuidedNav() {
+      escapeNavActive = true;
+      document.getElementById('escapeIRPW').style.display = 'none';
+      document.getElementById('escapeNavHero').classList.add('visible');
+      addExitAlert(venue?.gate || 'Gate 7', 'NAVIGATION LOCK', 'clear');
+      exitDistanceM = Math.min(exitDistanceM, 420);
+    }
+    function stopGuidedNav() {
+      escapeNavActive = false;
+      document.getElementById('escapeNavHero').classList.remove('visible');
+      document.getElementById('escapeIRPW').style.display = 'flex';
+    }
+
+    /* ── Tab Animations ── */
+    function applyTabEnterAnim(ids) {
+      ids.forEach((id, i) => {
+        const el = document.getElementById(id); if (!el) return;
+        el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
+        el.style.transition = `opacity 0.38s cubic-bezier(0.16,1,0.3,1) ${i * 55}ms,transform 0.38s cubic-bezier(0.16,1,0.3,1) ${i * 55}ms`;
+        requestAnimationFrame(() => { requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }); });
+      });
+    }
+
+    /* ── Simulation ── */
+    function startSimulation() { runSimTick(); simInterval = setInterval(runSimTick, 6000); }
+
+    function runSimTick() {
+      const cfg = EVENT_CONFIG[activeEventType] || EVENT_CONFIG.IPL;
+      const level = INTENSITY_LEVELS[Math.floor(Math.random() * INTENSITY_LEVELS.length)];
+      lastSimState = {
+        level,
+        phaseIdx: Math.floor(Math.random() * cfg.phases.length),
+        intensityIdx: Math.floor(Math.random() * cfg.intensityLabels.length),
+        windowIdx: Math.floor(Math.random() * cfg.windowLabels.length),
+        proofIdx: Math.floor(Math.random() * cfg.proofTexts.length),
+        recIdx: Math.floor(Math.random() * cfg.recommendations.length),
+        reasonIdx: Math.floor(Math.random() * cfg.reasons.length),
+        feedEvent: cfg.feedEvents[Math.floor(Math.random() * cfg.feedEvents.length)]
+      };
+
+      const titleEl = document.getElementById('intensityTitle');
+      if (titleEl) { titleEl.innerText = level; titleEl.style.color = INTENSITY_COLORS_MAP[level]; }
+      const descEl = document.getElementById('intensityDesc');
+      if (descEl) descEl.innerText = INTENSITY_DESCS[level];
+
+      const grid = document.getElementById('zonesGrid');
+      if (grid) {
+        grid.innerHTML = '';
+        ZONES.forEach(zone => {
+          const status = STATUS_OPTIONS[Math.floor(Math.random() * STATUS_OPTIONS.length)];
+          const color = STATUS_COLORS[status];
+          const pill = document.createElement('div'); pill.className = 'sensor-pill';
+          pill.innerHTML = `<span style="font-size:12px;font-weight:600;">${zone}</span><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:${color};font-family:'JetBrains Mono';letter-spacing:1px;">${status}</span><div class="status-dot" style="background:${color};color:${color};"></div></div>`;
+          grid.appendChild(pill);
+        });
+      }
+
+      addLog(lastSimState.feedEvent.t, lastSimState.feedEvent.msg);
+
+      const recEl = document.getElementById('recTitle');
+      if (recEl) { recEl.innerText = cfg.recommendations[lastSimState.recIdx]; recEl.style.color = INTENSITY_COLORS_MAP[level]; }
+      const reasonEl = document.getElementById('recReason');
+      if (reasonEl) reasonEl.innerText = cfg.reasons[lastSimState.reasonIdx];
+
+      if (lastSimState.windowIdx === 0 && activeTab === 'home') startWindowRing(90);
+
+      if (activeTab === 'service') updateServicePanel();
+      if (activeTab === 'escape') updateEscapePanel();
+
+      timeSavedMin = Math.min(45, timeSavedMin + (Math.random() > 0.6 ? 1 : 0));
+      const tsEl = document.getElementById('timeSavedNum'); if (tsEl) tsEl.innerText = timeSavedMin;
+    }
+
+    function updateEscapePanel() {
+      const decrement = escapeNavActive ? Math.floor(Math.random() * 25 + 15) : Math.floor(Math.random() * 10 + 3);
+      exitDistanceM = Math.max(50, exitDistanceM - decrement);
+      updateExitMeter();
+      if (exitRushMin > 0) {
+        exitRushMin = Math.max(0, exitRushMin - (Math.random() > 0.5 ? 1 : 0));
+        const rc = document.getElementById('rushCountdown');
+        if (rc) rc.innerText = exitRushMin === 0 ? 'NOW!' : exitRushMin;
+      }
+      if (currentTransport) {
+        currentTransport.metro.etaSec = Math.max(60, currentTransport.metro.etaSec + Math.floor(Math.random() * 60 - 30));
+        currentTransport.ride.etaSec = Math.max(120, currentTransport.ride.etaSec + Math.floor(Math.random() * 60 - 30));
+        currentTransport.ride.cars = Math.max(3, currentTransport.ride.cars + Math.floor(Math.random() * 5 - 2));
+        updateTransportUI(currentTransport);
+      }
+      pushExitAlert();
+      if (escapeNavActive && exitDistanceM < 300) {
+        const cmd = document.getElementById('navActiveCmd'), s1 = document.getElementById('navStep1'), d1 = document.getElementById('navDist1');
+        const vn = currentVenue;
+        if (exitDistanceM < 150) { if (cmd) cmd.innerText = `ARRIVE ${vn.gate || 'GATE 7'}\nCLEAR ENTRY`; if (s1) s1.innerText = `Enter ${vn.gate || 'Gate 7'} — show your ticket`; if (d1) d1.innerText = `${exitDistanceM}m`; }
+        else if (exitDistanceM < 250) { if (cmd) cmd.innerText = 'TURN RIGHT\nNORTH RAMP'; if (s1) s1.innerText = `Turn right at ${vn.gate || 'Gate 7'} junction`; if (d1) d1.innerText = `${exitDistanceM}m`; }
+      }
+    }
+
+    function pushExitAlert() {
+      const pool = EXIT_ALERT_POOL[activeEventType] || EXIT_ALERT_POOL.IPL;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const now = new Date();
+      const ts = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}]`;
+      addExitAlert(pick[0].replace('{t}', ts), pick[1], pick[2]);
+    }
+    function addExitAlert(zone, status, type) {
+      const feed = document.getElementById('exitAlertsFeed'); if (!feed) return;
+      const item = document.createElement('div'); item.className = 'exit-alert-item';
+      const statusClass = type === 'critical' ? 'ea-critical' : type === 'clear' ? 'ea-clear' : 'ea-moderate';
+      item.innerHTML = `<span class="ea-time">${zone}</span>${status ? `<span class="${statusClass}">${status}</span>` : ''}`;
+      feed.prepend(item);
+      if (feed.children.length > 6) feed.lastElementChild.remove();
+    }
+
+    function updateServicePanel() {
+      const cfg = EVENT_CONFIG[activeEventType] || EVENT_CONFIG.IPL;
+      const s = lastSimState;
+      if (!orderActive) {
+        const tlPhase = document.getElementById('tlPhase'); if (tlPhase) tlPhase.innerText = cfg.phases[s.phaseIdx];
+        const tlInt = document.getElementById('tlIntensity'); if (tlInt) tlInt.innerText = cfg.intensityLabels[s.intensityIdx];
+        const tlWin = document.getElementById('tlWindow'); if (tlWin) tlWin.innerText = cfg.windowLabels[s.windowIdx].split('·')[0].trim();
+        const proofEl = document.getElementById('tierProofText'); if (proofEl) proofEl.innerText = cfg.proofTexts[s.proofIdx];
+      }
+      const pool = ALERT_POOL[activeEventType] || ALERT_POOL.IPL;
+      const alert = pool[Math.floor(Math.random() * pool.length)];
+      addAlert(alert.tag, alert.msg);
+    }
+
+    /* ── Tab Switching ── */
+    function switchTab(tab) {
+      activeTab = tab;
+      const dash = document.getElementById('dashboard-screen');
+      const all = ['col-left', 'col-center', 'col-right', 'service-hub', 'service-right', 'escape-left', 'escape-center', 'escape-right'];
+      const visible = all.filter(id => { const el = document.getElementById(id); return el && el.style.display !== 'none'; });
+      visible.forEach(id => { const el = document.getElementById(id); if (el) { el.style.transition = 'opacity 0.18s ease'; el.style.opacity = '0'; } });
+      setTimeout(() => {
+        all.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+        const sh = document.getElementById('service-hub'), sr = document.getElementById('service-right');
+        if (sh) sh.classList.remove('active'); if (sr) sr.classList.remove('active');
+
+        if (tab === 'service') {
+          dash.className = 'active layout-service';
+          const sH = document.getElementById('service-hub'); sH.style.display = 'flex'; sH.classList.add('active');
+          const sR = document.getElementById('service-right'); sR.style.display = 'flex'; sR.classList.add('active');
+          renderServiceState();
+          if (Object.keys(lastSimState).length) updateServicePanel();
+          applyTabEnterAnim(['service-hub', 'service-right']);
+        } else if (tab === 'escape') {
+          dash.className = 'active layout-escape';
+          ['escape-left', 'escape-center', 'escape-right'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; });
+          setTimeout(() => { initEscapeMap(); if (escapeLeafMap) escapeLeafMap.invalidateSize(); }, 80);
+          const feed = document.getElementById('exitAlertsFeed');
+          if (feed && feed.children.length === 0) {
+            addExitAlert(`${currentVenue?.altGate || 'Gate 5'} Flow`, 'CRITICAL (92% Load)', 'critical');
+            addExitAlert(currentVenue?.gate || 'Gate 7', 'CLEAR VECTOR', 'clear');
+            addExitAlert('Corridor D', 'Clear Vector', 'clear');
+          }
+          if (Object.keys(lastSimState).length) updateEscapePanel();
+          applyTabEnterAnim(['escape-left', 'escape-center', 'escape-right']);
+        } else {
+          dash.className = 'active layout-home';
+          ['col-left', 'col-center', 'col-right'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; });
+          applyTabEnterAnim(['col-left', 'col-center', 'col-right']);
+        }
+        renderNavActive(tab);
+      }, 180);
+    }
+
+    function renderServiceState() {
+      const selState = document.getElementById('selection-state'), execState = document.getElementById('execution-state'), banner = document.getElementById('orderActiveBanner');
+      if (orderActive) { selState.style.display = 'none'; execState.classList.add('visible'); banner.classList.add('visible'); }
+      else { selState.style.display = 'flex'; execState.classList.remove('visible'); banner.classList.remove('visible'); }
+    }
+
+    function renderNavActive(tab) {
+      ['home', 'service', 'escape'].forEach(t => {
+        const el = document.getElementById(`nav-${t}`); if (!el) return;
+        el.className = 'nav-item';
+        if (t === tab) el.classList.add('active', `active-${t}`);
+      });
+    }
+
+    /* ── Service Selection ── */
+    function selectItem(idx) {
+      const cfg = EVENT_CONFIG[activeEventType] || EVENT_CONFIG.IPL;
+      const item = cfg.concessionItems[idx];
+      const sInfo = parseSection(userSection, currentVenue);
+      selectedItemIdx = idx; orderActive = true;
+      activeOrderNum = Math.floor(Math.random() * 300) + 100;
+      document.querySelectorAll('.sel-item').forEach(el => el.classList.remove('selected'));
+      document.getElementById(`selItem${idx}`)?.classList.add('selected');
+      const selState = document.getElementById('selection-state'), execState = document.getElementById('execution-state'), banner = document.getElementById('orderActiveBanner');
+      selState.style.transition = 'opacity 0.3s ease,transform 0.3s ease';
+      selState.style.opacity = '0'; selState.style.transform = 'translateY(-8px)';
+      setTimeout(() => { selState.style.display = 'none'; execState.classList.add('visible'); banner.classList.add('visible'); }, 300);
+      document.getElementById('execWalk').innerText = `Walk Time: ${sInfo.walk}`;
+      document.getElementById('execIdentity').innerText = `Order #${activeOrderNum} | Secured at ${sInfo.concession}`;
+      document.getElementById('execDest').innerText = `${sInfo.concession} · Section ${userSection}`;
+      document.getElementById('tokenNumber').innerText = `#${activeOrderNum}`;
+      document.getElementById('tokenItemLabel').innerText = `${item.emoji} ${item.name} · ${sInfo.concession}`;
+      document.getElementById('tokenIdle').style.display = 'none';
+      document.getElementById('tokenActive').style.display = 'block';
+      startCountdown(300);
+      addAlert('order', `Token #${activeOrderNum} confirmed. ${item.emoji} ${item.name} queued at ${sInfo.concession}.`);
+    }
+
+    function cancelOrder() {
+      orderActive = false; selectedItemIdx = -1;
+      const selState = document.getElementById('selection-state'), execState = document.getElementById('execution-state'), banner = document.getElementById('orderActiveBanner');
+      execState.classList.remove('visible'); banner.classList.remove('visible');
+      selState.style.display = 'flex'; selState.style.opacity = '0'; selState.style.transform = 'translateY(8px)';
+      requestAnimationFrame(() => { selState.style.transition = 'opacity 0.4s ease,transform 0.4s ease'; selState.style.opacity = '1'; selState.style.transform = 'translateY(0)'; });
+      document.querySelectorAll('.sel-item').forEach(el => el.classList.remove('selected'));
+      document.getElementById('tokenIdle').style.display = 'block'; document.getElementById('tokenActive').style.display = 'none';
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      addAlert('system', 'Order cancelled. Concession token released.');
+    }
+
+    function startCountdown(secs) {
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownSec = secs; const totalDash = 295.31;
+      updateRing(secs, totalDash);
+      countdownInterval = setInterval(() => { countdownSec--; if (countdownSec < 0) { clearInterval(countdownInterval); return; } updateRing(countdownSec, totalDash); }, 1000);
+    }
+    function updateRing(remaining, total) {
+      const pct = remaining / total, offset = total * (1 - pct);
+      const arc = document.getElementById('ringArc'), timer = document.getElementById('cdTimer');
+      if (!arc || !timer) return;
+      arc.style.strokeDashoffset = offset;
+      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const s = (remaining % 60).toString().padStart(2, '0');
+      timer.innerText = `${m}:${s}`;
+    }
+
+    function addAlert(tag, msg) {
+      const feed = document.getElementById('alertsFeed'); if (!feed) return;
+      const tagColors = { order: 'tag-order', friend: 'tag-friend', system: 'tag-system' };
+      const tagLabels = { order: 'Order', friend: 'Friend', system: 'System' };
+      const item = document.createElement('div'); item.className = 'alert-item';
+      item.innerHTML = `<div class="alert-tag ${tagColors[tag] || 'tag-system'}">${tagLabels[tag] || 'System'}</div><div style="font-size:11px;color:rgba(255,255,255,0.75);">${msg}</div>`;
+      feed.prepend(item);
+      if (feed.children.length > 5) feed.lastElementChild.remove();
+    }
+
+    function addLog(type, msg) {
+      const container = document.getElementById('logContainer'); if (!container) return;
+      const entry = document.createElement('div'); entry.className = 'log-entry';
+      const ts = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      entry.innerHTML = `<span class="log-ts">[${ts}]</span><span class="log-icon">${LOG_ICON[type] || '·'}</span><span class="log-text ${LOG_CLASS[type] || ''}">${msg}</span>`;
+      container.prepend(entry);
+      if (container.children.length > 7) container.lastElementChild.remove();
+    }
+
+    /* ── Disconnect ── */
     function disconnectVenue() {
       stopQRScanner();
+      if (simInterval) { clearInterval(simInterval); simInterval = null; }
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      if (windowArcInterval) { clearInterval(windowArcInterval); windowArcInterval = null; }
+      if (escapeLeafMap) { escapeLeafMap.remove(); escapeLeafMap = null; escapeMapInitialized = false; }
       location.reload();
     }
 
+    /* ── Utils ── */
     function getDistance(la1, lo1, la2, lo2) {
-      const R = 6371;
-      const dLa = (la2 - la1) * Math.PI / 180;
-      const dLo = (lo2 - lo1) * Math.PI / 180;
-      const a = Math.sin(dLa / 2) ** 2
-        + Math.cos(la1 * Math.PI / 180) * Math.cos(la2 * Math.PI / 180) * Math.sin(dLo / 2) ** 2;
+      const R = 6371, dLa = (la2 - la1) * Math.PI / 180, dLo = (lo2 - lo1) * Math.PI / 180;
+      const a = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * Math.PI / 180) * Math.cos(la2 * Math.PI / 180) * Math.sin(dLo / 2) ** 2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
-
     function showError(title, msg, showOverride) {
       document.getElementById('errorTitle').innerText = title;
       document.getElementById('errorMsg').innerText = msg;
       document.getElementById('errorModal').style.display = 'block';
       document.getElementById('overrideBtn').style.display = showOverride ? 'block' : 'none';
     }
-
     function closeError() { document.getElementById('errorModal').style.display = 'none'; }
-    function resetBtn(b) { b.disabled = false; b.innerText = "Sync with Aegis →"; }
-
-    function addLog(msg) {
-      const container = document.getElementById('logContainer');
-      const entry = document.createElement('div');
-      entry.className = 'log-entry';
-      const ts = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
-      entry.innerHTML = `<span class="ts">[${ts}]</span> ${msg}`;
-      container.prepend(entry);
-      if (container.children.length > 7) container.lastElementChild.remove();
-    }
+    function resetBtn(b) { b.disabled = false; b.innerText = 'Sync with Aegis →'; }
   </script>
 </body>
 
