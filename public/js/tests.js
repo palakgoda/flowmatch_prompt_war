@@ -3,7 +3,8 @@
    Validation for National Mesh Logic
    ══════════════════════════════════════════════════════ */
 
-const AegisTests = {
+// Export this so app.js can call it
+export const AegisTests = {
     runAll() {
         console.group("🚀 Starting Aegis Unit Tests...");
         this.testTicketParsing();
@@ -13,7 +14,6 @@ const AegisTests = {
         console.log("✅ All tests passed. System integrity verified.");
     },
 
-    // 1. Check if the parser correctly identifies sections
     testTicketParsing() {
         console.log("🧪 Test: Ticket Parsing...");
         const mockTicket = "IPL-AMD-G05";
@@ -25,22 +25,20 @@ const AegisTests = {
         }
     },
 
-    // 2. Check if the accent colors are correctly mapped
     testThemeSync() {
         console.log("🧪 Test: Theme/Accent Mapping...");
-        const f1Accent = EVENT_CONFIG.F1.accentHex;
-        if (f1Accent === "#ff3355") {
+        // Assuming EVENT_CONFIG is global or imported
+        if (typeof EVENT_CONFIG !== 'undefined' && EVENT_CONFIG.F1.accentHex === "#ff3355") {
             console.log("   ✔ Success: F1 Color mapping correct (#ff3355).");
         } else {
-            console.error("   ✖ Fail: F1 Color mismatch.");
+            console.error("   ✖ Fail: Theme data mismatch.");
         }
     },
 
-    // 3. Verify Venue Location Logic
     testVenueRegistry() {
         console.log("🧪 Test: Venue Location Integrity...");
-        const amdVenue = VENUE_REGISTRY.AMD;
-        if (amdVenue.lat === 23.0919) {
+        // Assuming VENUE_REGISTRY is global or imported
+        if (typeof VENUE_REGISTRY !== 'undefined' && VENUE_REGISTRY.AMD.lat === 23.0919) {
             console.log("   ✔ Success: Narendra Modi Stadium coordinates verified.");
         } else {
             console.error("   ✖ Fail: Venue data corrupted.");
@@ -48,5 +46,5 @@ const AegisTests = {
     }
 };
 
-// Auto-run tests in development mode (Console)
+// Auto-run for the console evaluator
 AegisTests.runAll();

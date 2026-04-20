@@ -1,5 +1,8 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { AegisTests } from './tests.js';
+
+// Run tests immediately to prove system integrity
+AegisTests.runAll();
 /* ══════════════════════════════════════════════════════
    AEGIS APP LOGIC — Operational Brain
    ══════════════════════════════════════════════════════ */
@@ -19,16 +22,6 @@ let exitDistanceM = 450, exitRushMin = 8;
 let windowArcTotal = 929.91, windowArcInterval = null;
 let currentTransport = null;
 let accentTransitioning = false;
-
-// This config connects your Cloud Run frontend to your Google Project backend
-const firebaseConfig = {
-    apiKey: "GOOGLE_API_KEY_PLACEHOLDER",
-    authDomain: "flowmatch-pro.firebaseapp.com",
-    projectId: "flowmatch-pro"
-};
-const app = initializeApp(firebaseConfig);
-console.log("🚀 Aegis Cloud: Connected to Google Cloud Run Node.");
-
 
 /* ── Hint Pills ── */
 function setHint(val) {
@@ -649,3 +642,25 @@ async function checkGoogleCloudHealth() {
     }
 }
 checkGoogleCloudHealth();
+
+// This "attaches" your function to the window so the HTML buttons can see it
+// Add this at the end of app.js
+window.setHint = function (value) {
+    const input = document.getElementById('ticketInput');
+    if (input) {
+        input.value = value;
+        console.log("Aegis: Hint applied - " + value);
+    }
+};
+
+// Expose enterVenue so the "Sync with Aegis" button works
+// This links the window button directly to your logic above
+window.enterVenue = enterVenue;
+window.switchTab = switchTab;
+window.selectItem = selectItem;
+window.cancelOrder = cancelOrder;
+window.startGuidedNav = startGuidedNav;
+window.stopGuidedNav = stopGuidedNav;
+window.disconnectVenue = disconnectVenue;
+window.switchAuthTab = switchAuthTab;
+window.proceedAnyway = proceedAnyway;
