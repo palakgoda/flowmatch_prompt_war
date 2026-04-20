@@ -22,7 +22,7 @@ let accentTransitioning = false;
 
 // This config connects your Cloud Run frontend to your Google Project backend
 const firebaseConfig = {
-    apiKey: "GOOGLE_API_KEY",
+    apiKey: "GOOGLE_API_KEY_PLACEHOLDER",
     authDomain: "flowmatch-pro.firebaseapp.com",
     projectId: "flowmatch-pro"
 };
@@ -57,7 +57,7 @@ function setDefaultCoords() { userCoords = { lat: 18.5204, lon: 73.8567 }; docum
 async function verifyVenueProximity(venueLat, venueLon) {
     // In a production app, we call the Google Maps Distance Matrix API
     // to calculate the real walking distance between the user and the Gate.
-    const googleEndpoint = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${userCoords.lat},${userCoords.lon}&destinations=${venueLat},${venueLon}&key=AIzaSy_PROMPT_WAR_KEY`;
+    const googleEndpoint = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${userCoords.lat},${userCoords.lon}&destinations=${venueLat},${venueLon}&key=GOOGLE_API_KEY_PLACEHOLDER`;
 
     console.log("🛰️ Google Maps API: Calculating precise corridor distance...");
 

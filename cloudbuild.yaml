@@ -1,0 +1,13 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - '_GOOGLE_API_KEY=${_GOOGLE_API_KEY}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/flowmatch-pro'
+      - '.'
+images:
+  - 'gcr.io/$PROJECT_ID/flowmatch-pro'
+substitutions:
+  _GOOGLE_API_KEY: 'default_placeholder'

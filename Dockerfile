@@ -7,8 +7,8 @@ ARG _GOOGLE_API_KEY
 COPY public /usr/share/nginx/html
 
 # 3. The Injection logic
-# We use ${_GOOGLE_API_KEY} to match the substitution name exactly
-RUN sed -i "s/_GOOGLE_API_KEY/${_GOOGLE_API_KEY}/g" /usr/share/nginx/html/index.html
+RUN sed -i "s/GOOGLE_API_KEY_PLACEHOLDER/${_GOOGLE_API_KEY}/g" /usr/share/nginx/html/index.html && \
+    sed -i "s/GOOGLE_API_KEY_PLACEHOLDER/${_GOOGLE_API_KEY}/g" /usr/share/nginx/html/js/app.js
 
 # 4. Standard Nginx Port for Cloud Run
 RUN sed -i 's/listen\(.*\)80;/listen 8080;/g' /etc/nginx/conf.d/default.conf
